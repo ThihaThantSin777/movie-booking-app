@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MBA</string>
+    <string name="facebook_app_id">324813139596296</string>
+    <string name="fb_login_protocol_scheme">fb324813139596296</string>
+    <string name="facebook_client_token">d0795339fbde89c37d1c8ac50d9eb779</string>
+</resources>
