@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:movie_booking_app/bloc/seat_choose_bloc.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
@@ -14,103 +15,83 @@ import 'package:movie_booking_app/widgets/back_button_widget.dart';
 import 'package:movie_booking_app/widgets/button_text_widget.dart';
 import 'package:movie_booking_app/widgets/button_widget.dart';
 import 'package:movie_booking_app/widgets/dotts_line_widget.dart';
+import 'package:provider/provider.dart';
 
-class SeatingTicketScreen extends StatefulWidget {
+
+
+class SeatingTicketScreen extends StatelessWidget {
   final DayTimeSlotVO dayTimeSlotVO;
   final TimeSlotsVO timeSlotsVO;
   String date;
   final MovieVO movieVO;
   SeatingTicketScreen(
       {required this.dayTimeSlotVO,
-      required this.timeSlotsVO,
-      required this.date,
-      required this.movieVO});
-
-  @override
-  State<SeatingTicketScreen> createState() => _SeatingTicketScreenState();
-}
-
-class _SeatingTicketScreenState extends State<SeatingTicketScreen> {
-  MovieBookingModel movieBookingModel = MovieBookingModelImpl();
-  List<SeatinTypeVO>? seatTypeVO;
-  int seatCount = 0;
-  String selectSeatName = "";
-  int price = 0;
-  List<String> selectSeats = [];
-  String dateTemp = '';
-  @override
-  void initState() {
-    dateTemp = widget.date;
-    DateTime dateTime = DateTime.parse(dateTemp);
-    widget.date =
-        '${DateFormat('EEEE, dd, MMM').format(dateTime)} , ${widget.timeSlotsVO.startTime ?? ""}';
-    movieBookingModel
-        .getSeatingTypeList(widget.timeSlotsVO.cinemaDayTimeSlotID ?? 0,
-            dateTemp, movieBookingModel.getToken()?? '')
-        .then((value) {
-      setState(() {
-        seatTypeVO = value;
-      });
-    }).catchError((error) => print(error));
-    super.initState();
-  }
-
-  void _selectSeat(SeatinTypeVO seatVO) {
-    setState(() {
-      seatTypeVO?.forEach((element) {
-        if (element == seatVO) {
-          element.isSelect = !element.isSelect;
-          if (element.isSelect) {
-            seatCount++;
-            selectSeats.add(element.seatName ?? '');
-            price += element.price ?? 0;
-          } else {
-            seatCount--;
-            selectSeats.remove(element.seatName ?? '');
-            price -= element.price ?? 0;
-          }
-        }
-      });
-      selectSeatName = selectSeats.join(',');
-    });
-  }
-
+        required this.timeSlotsVO,
+        required this.date,
+        required this.movieVO});
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 0,
+    return ChangeNotifierProvider(
+      create: (_)=>SeatChooseBloc(date, timeSlotsVO),
+      child: Scaffold(
           backgroundColor: Colors.white,
-          leading: const BackButtonView(
-            color: Colors.black,
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.white,
+            leading: const BackButtonView(
+              color: Colors.black,
+            ),
           ),
-        ),
-        body: seatTypeVO?.isEmpty ?? true
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : Container(
+          body: Selector<SeatChooseBloc,List<SeatinTypeVO>?>(
+            selector: (_,bloc)=>bloc.getSeatTypeVO,
+            builder: (_,seatTypeVO,child)=>
+            seatTypeVO?.isEmpty ?? true
+                ? const Center(
+              child: CircularProgressIndicator(),
+            )
+                : Container(
+              width: double.infinity,
+              color: Colors.white,
+              child: Container(
                 width: double.infinity,
                 color: Colors.white,
-                child: Container(
-                  width: double.infinity,
-                  color: Colors.white,
-                  child: SingleChildScrollView(
-                      child: MovieSeatGridSessionView(
-                    onClick: () => _navigateToSnackScreenView(context),
-                    movieTitle: widget.movieVO.originalTitle ?? '',
-                    cinemaName: widget.dayTimeSlotVO.cinema.toString(),
-                    startTime: widget.timeSlotsVO.startTime.toString(),
-                    dateTime: widget.date,
-                    seatsList: seatTypeVO ?? [],
-                    seatCount: seatCount,
-                    onTap: (obj) => _selectSeat(obj),
-                    selectSeatName: selectSeatName,
-                    price: price,
-                  )),
-                ),
-              ));
+                child: SingleChildScrollView(
+                    child: Selector<SeatChooseBloc,int>(
+                      selector: (_,bloc)=>bloc.getSeatCount,
+                      builder: (_,seatCount,child)=>
+                       Selector<SeatChooseBloc,String>(
+                         selector: (_,bloc)=>bloc.getSelectSeatName,
+                           builder: (_,selectSeat,child)=>
+                       Selector<SeatChooseBloc,int>(
+                         selector: (_,bloc)=>bloc.getPrice,
+                         builder: (_,price,child)=>
+                             Selector<SeatChooseBloc,String>(
+                               selector: (_,bloc)=>bloc.getDateTemp,
+                               builder: (_,dateTemp,child){
+                                 SeatChooseBloc seatChooseBloc=Provider.of(_,listen: false);
+                                 return  MovieSeatGridSessionView(
+                                   onClick: ()=>_navigateToSnackScreenView(context, seatTypeVO, dateTemp, price),
+                                   movieTitle:movieVO.originalTitle ?? '',
+                                   cinemaName:dayTimeSlotVO.cinema.toString(),
+                                   startTime:timeSlotsVO.startTime.toString(),
+                                   dateTime: dateTemp,
+                                   seatsList: seatTypeVO??[],
+                                   seatCount: seatCount,
+                                   onTap: (obj) => seatChooseBloc.selectSeat(obj),
+                                   selectSeatName: selectSeat,
+                                   price: price,
+                                 );
+                               }
+                             )
+
+                       ),
+                       ),
+                    )),
+              ),
+            )
+          ),
+      ),
+    );
   }
 
   _showALertBox(context, String message, String subMessage) async {
@@ -133,8 +114,7 @@ class _SeatingTicketScreenState extends State<SeatingTicketScreen> {
         });
   }
 
-  void _navigateToSnackScreenView(context) {
-    SeatinTypeVO? seatVO;
+  void _navigateToSnackScreenView(context,seatTypeVO,dateTemp,price) {
     List<String> listRow = [];
     List<String> listSeats = [];
     String row = '';
@@ -156,13 +136,13 @@ class _SeatingTicketScreenState extends State<SeatingTicketScreen> {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
         return SnackAndPayMentScreen(
           subPrice: price,
-          dayTimeSlotVO: widget.dayTimeSlotVO,
-          timeSlotsVO: widget.timeSlotsVO,
+          dayTimeSlotVO: dayTimeSlotVO,
+          timeSlotsVO: timeSlotsVO,
           bookingDate: dateTemp,
-          movieVO: widget.movieVO,
+          movieVO: movieVO,
           row: row,
           seat: seats,
-          formatDate: widget.date,
+          formatDate: date,
         );
       }));
     }

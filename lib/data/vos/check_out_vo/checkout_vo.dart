@@ -71,4 +71,39 @@ class CheckoutVO {
   String toString() {
     return 'CheckoutVO{id: $id, bookingNo: $bookingNo, bookingDate: $bookingDate, row: $row, seat: $seat, totalSeat: $totalSeat, total: $total, movieID: $movieID, cinemaID: $cinemaID, userName: $userName, timeslot: $timeslot, snacks: $snacks, qrCode: $qrCode}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CheckoutVO &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          bookingNo == other.bookingNo &&
+          bookingDate == other.bookingDate &&
+          row == other.row &&
+          seat == other.seat &&
+          totalSeat == other.totalSeat &&
+          total == other.total &&
+          movieID == other.movieID &&
+          cinemaID == other.cinemaID &&
+          userName == other.userName &&
+          timeslot == other.timeslot &&
+          snacks == other.snacks &&
+          qrCode == other.qrCode;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      bookingNo.hashCode ^
+      bookingDate.hashCode ^
+      row.hashCode ^
+      seat.hashCode ^
+      totalSeat.hashCode ^
+      total.hashCode ^
+      movieID.hashCode ^
+      cinemaID.hashCode ^
+      userName.hashCode ^
+      timeslot.hashCode ^
+      snacks.hashCode ^
+      qrCode.hashCode;
 }

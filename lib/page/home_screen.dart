@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_booking_app/bloc/home_bloc.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
@@ -10,15 +11,11 @@ import 'package:movie_booking_app/persistance/daos/user_dao.dart';
 import 'package:movie_booking_app/resources/colors.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreeen extends StatefulWidget {
-  const HomeScreeen({Key? key}) : super(key: key);
 
-  @override
-  _HomeScreeenState createState() => _HomeScreeenState();
-}
 
-class _HomeScreeenState extends State<HomeScreeen> {
+class HomeScreen extends StatelessWidget {
   final List<String> menuItems = [
     'Promotion code',
     'Select a language',
@@ -26,59 +23,9 @@ class _HomeScreeenState extends State<HomeScreeen> {
     'Help',
     'Rate us'
   ];
-  UserVO? userVO;
-  List<MovieVO>? getNowPlayingmovieVO;
-  List<MovieVO>? getComingSoonMovieVO;
-  MovieBookingModel movieBookingModel = MovieBookingModelImpl();
-  bool isLoading = false;
-  @override
-  void initState() {
-    movieBookingModel.getSnackList(movieBookingModel.getToken() ?? '');
-    movieBookingModel.getUserInfo().listen((user) {
-      setState(() {
-        userVO = user;
-      });
-    },
-      onError: (error)=>print(error)
-    );
 
-
-movieBookingModel.getNowPlayingMovieModleFromDataBase(API_KEY, LANGUAGE, 1).listen((movies) {
-  setState(() {
-    getNowPlayingmovieVO = movies;
-  });
-},
-  onError: (error)=>print(error)
-);
-
-
-    movieBookingModel.getComingSoonMovieModleFromDataBase(API_KEY, LANGUAGE, 1).listen((movies) {
-      setState(() {
-        getComingSoonMovieVO = movies;
-      });
-    },
-      onError: (error)=>print(error)
-    );
-
-
-    super.initState();
-  }
-
-  _logout(context) {
-    String message = '';
-    String subMessage = '';
-    //  print(userDAO.getAuthorizationToken());
-    movieBookingModel.logout(movieBookingModel.getToken() ?? '').then((value) {
-      message = 'Success';
-      subMessage = value?.message ?? '';
-      movieBookingModel.deleteUserInfo();
-      _showALertBox(context, message, subMessage);
-    }).catchError((error) {
-      print(error);
-      message = 'Error';
-      subMessage = 'Logout Fail';
-      _showALertBox(context, message, subMessage);
-    });
+  _showResult(message, subMessage, context) {
+    _showALertBox(context, message, subMessage);
   }
 
   _showALertBox(context, String message, String subMessage) async {
@@ -110,69 +57,89 @@ movieBookingModel.getNowPlayingMovieModleFromDataBase(API_KEY, LANGUAGE, 1).list
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: Stack(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            child: Drawer(
-              child: DrawerSessionView(
-                menuItems: menuItems,
-                userVO: userVO ?? UserVO.normal(),
-                onTap: () => _logout(context),
+    return ChangeNotifierProvider(
+      create: (_) => HomeBloc(),
+      child: Selector<HomeBloc, UserVO?>(
+        selector: (_, bloc) => bloc.getUser,
+        builder: (_, user, child) => Scaffold(
+          drawer: Stack(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Drawer(
+                  child: DrawerSessionView(
+                    menuItems: menuItems,
+                    userVO: user ?? UserVO.normal(),
+                    onTap: () {
+                      HomeBloc homeBloc = Provider.of(_, listen: false);
+                      homeBloc.logout().then((value) {
+                        homeBloc.deleteUserData();
+                        _showResult('Success', value?.message, context);
+                      }).catchError((error) {
+                        _showResult('Error', 'Logout Fail', context);
+                      });
+                    },
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-      backgroundColor: white_color,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        leading: Image.asset('images/menu.png'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: margin_small_2x),
-            child: Icon(
-              Icons.search,
-              color: black_color,
-              size: search_icon_size,
-            ),
-          )
-        ],
-      ),
-      body: ListView(
-        children: [
-          const SizedBox(
-            height: spacing_micro_1x,
-          ),
-          HomeScreenTitleSession(
-            userVO: userVO ?? UserVO.normal(),
-          ),
-          const SizedBox(
-            height: margin_medium,
-          ),
-          getNowPlayingmovieVO == null
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : MovieBodyView(
-                  movieList: getNowPlayingmovieVO ?? [],
-                  onClick: (id) =>
-                      _navigateToMovieDetailsScreen(context, id ?? 0),
-                  title: now_showing,
+          backgroundColor: white_color,
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.white,
+            leading: Image.asset('images/menu.png'),
+            actions: const [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: margin_small_2x),
+                child: Icon(
+                  Icons.search,
+                  color: black_color,
+                  size: search_icon_size,
                 ),
-          getComingSoonMovieVO == null
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : MovieBodyView(
-                  movieList: getComingSoonMovieVO ?? [],
-                  onClick: (id) =>
-                      _navigateToMovieDetailsScreen(context, id ?? 0),
-                  title: coming_soon,
-                ),
-        ],
+              )
+            ],
+          ),
+          body: ListView(
+            children: [
+              const SizedBox(
+                height: spacing_micro_1x,
+              ),
+              HomeScreenTitleSession(
+                userVO: user ?? UserVO.normal(),
+              ),
+              const SizedBox(
+                height: margin_medium,
+              ),
+              Selector<HomeBloc, List<MovieVO>?>(
+                selector: (_, bloc) => bloc.getNowPlayingVO,
+                builder: (_, getNowPlayingVO, child) => getNowPlayingVO == null
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : MovieBodyView(
+                        movieList: getNowPlayingVO,
+                        onClick: (id) =>
+                            _navigateToMovieDetailsScreen(context, id ?? 0),
+                        title: now_showing,
+                      ),
+              ),
+              Selector<HomeBloc, List<MovieVO>?>(
+                selector: (_, bloc) => bloc.getComingSoonVO,
+                builder: (_, getComingSoonVO, child) => getComingSoonVO == null
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : MovieBodyView(
+                        movieList: getComingSoonVO,
+                        onClick: (id) =>
+                            _navigateToMovieDetailsScreen(context, id ?? 0),
+                        title: coming_soon,
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -192,6 +159,7 @@ class HomeScreenTitleSession extends StatelessWidget {
     required this.userVO,
   }) : super(key: key);
   final UserVO userVO;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -213,7 +181,9 @@ class HomeScreenTitleSession extends StatelessWidget {
 
 class TextView extends StatelessWidget {
   final UserVO userVO;
+
   TextView(this.userVO);
+
   @override
   Widget build(BuildContext context) {
     return Text('Hi ${userVO.name}!',
@@ -274,7 +244,9 @@ class MovieBodyView extends StatelessWidget {
 
 class MovieBodyTitleView extends StatelessWidget {
   final String title;
+
   MovieBodyTitleView(this.title);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -332,6 +304,7 @@ class MoviesView extends StatelessWidget {
   final MovieVO movieVO;
   final String unKnownUrl =
       'https://cdn4.iconfinder.com/data/icons/political-elections/50/48-1024.png';
+
   MoviesView(this.movieVO);
 
   @override
@@ -463,6 +436,7 @@ class DrawerSessionView extends StatelessWidget {
 class LogOutView extends StatelessWidget {
   const LogOutView({Key? key, required this.onTap}) : super(key: key);
   final Function onTap;
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -487,6 +461,7 @@ class DrawerMenuListView extends StatelessWidget {
   }) : super(key: key);
 
   final List<String> menuItems;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -513,6 +488,7 @@ class DrawerMenuListView extends StatelessWidget {
 class DrawerHeaderSessionView extends StatelessWidget {
   DrawerHeaderSessionView({Key? key, required this.userVO}) : super(key: key);
   final UserVO userVO;
+
   @override
   Widget build(BuildContext context) {
     return Row(

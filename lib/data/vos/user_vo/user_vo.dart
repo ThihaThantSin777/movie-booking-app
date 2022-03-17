@@ -53,4 +53,31 @@ class UserVO {
   String toString() {
     return 'UserVO{id: $id, name: $name, email: $email, phone: $phone, totalExpense: $totalExpense, profileImage: $profileImage, cards: $cards, token: $token, message: $message}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserVO &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          email == other.email &&
+          phone == other.phone &&
+          totalExpense == other.totalExpense &&
+          profileImage == other.profileImage &&
+          cards == other.cards &&
+          token == other.token &&
+          message == other.message;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      email.hashCode ^
+      phone.hashCode ^
+      totalExpense.hashCode ^
+      profileImage.hashCode ^
+      cards.hashCode ^
+      token.hashCode ^
+      message.hashCode;
 }

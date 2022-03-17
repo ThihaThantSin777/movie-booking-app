@@ -172,4 +172,71 @@ class MovieVO {
   String toString() {
     return 'MovieVO{adult: $adult, backdropPath: $backdropPath, belongsToCollection: $belongsToCollection, budget: $budget, genres: $genres, homePage: $homePage, genreIDs: $genreIDs, id: $id, imdbID: $imdbID, originalLanguage: $originalLanguage, originalTitle: $originalTitle, overview: $overview, popularity: $popularity, posterPath: $posterPath, productionCompanies: $productionCompanies, productionCountries: $productionCountries, releaseDate: $releaseDate, revenue: $revenue, runtime: $runtime, spokenLanguages: $spokenLanguages, status: $status, tagLine: $tagLine, title: $title, video: $video, voteAverage: $voteAverage, voteCount: $voteCount, order: $order}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MovieVO &&
+          runtimeType == other.runtimeType &&
+          adult == other.adult &&
+          backdropPath == other.backdropPath &&
+          belongsToCollection == other.belongsToCollection &&
+          budget == other.budget &&
+          genres == other.genres &&
+          homePage == other.homePage &&
+          genreIDs == other.genreIDs &&
+          id == other.id &&
+          imdbID == other.imdbID &&
+          originalLanguage == other.originalLanguage &&
+          originalTitle == other.originalTitle &&
+          overview == other.overview &&
+          popularity == other.popularity &&
+          posterPath == other.posterPath &&
+          productionCompanies == other.productionCompanies &&
+          productionCountries == other.productionCountries &&
+          releaseDate == other.releaseDate &&
+          revenue == other.revenue &&
+          runtime == other.runtime &&
+          spokenLanguages == other.spokenLanguages &&
+          status == other.status &&
+          tagLine == other.tagLine &&
+          title == other.title &&
+          video == other.video &&
+          voteAverage == other.voteAverage &&
+          voteCount == other.voteCount &&
+          order == other.order &&
+          isNowShowing == other.isNowShowing &&
+          isComingSoon == other.isComingSoon;
+
+  @override
+  int get hashCode =>
+      adult.hashCode ^
+      backdropPath.hashCode ^
+      belongsToCollection.hashCode ^
+      budget.hashCode ^
+      genres.hashCode ^
+      homePage.hashCode ^
+      genreIDs.hashCode ^
+      id.hashCode ^
+      imdbID.hashCode ^
+      originalLanguage.hashCode ^
+      originalTitle.hashCode ^
+      overview.hashCode ^
+      popularity.hashCode ^
+      posterPath.hashCode ^
+      productionCompanies.hashCode ^
+      productionCountries.hashCode ^
+      releaseDate.hashCode ^
+      revenue.hashCode ^
+      runtime.hashCode ^
+      spokenLanguages.hashCode ^
+      status.hashCode ^
+      tagLine.hashCode ^
+      title.hashCode ^
+      video.hashCode ^
+      voteAverage.hashCode ^
+      voteCount.hashCode ^
+      order.hashCode ^
+      isNowShowing.hashCode ^
+      isComingSoon.hashCode;
 }

@@ -1,12 +1,10 @@
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
-import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
+import 'package:movie_booking_app/bloc/pick_time_and_cinema_bloc.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/time_slots_vo.dart';
 import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
 import 'package:movie_booking_app/page/seat_chart_screen.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
 
 import 'package:movie_booking_app/resources/colors.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
@@ -14,88 +12,112 @@ import 'package:movie_booking_app/widgets/back_button_widget.dart';
 import 'package:movie_booking_app/widgets/button_text_widget.dart';
 import 'package:movie_booking_app/widgets/button_widget.dart';
 import 'package:movie_booking_app/widgets/header_title.dart';
+import 'package:provider/provider.dart';
 
-class PickTimeAndCinema extends StatefulWidget {
+
+class PickTimeAndCinema extends StatelessWidget {
   final MovieVO movieVO;
+
   PickTimeAndCinema({required this.movieVO});
   @override
-  State<PickTimeAndCinema> createState() => _PickTimeAndCinemaState();
-}
-
-class _PickTimeAndCinemaState extends State<PickTimeAndCinema> {
-  MovieBookingModel movieBookingModel = MovieBookingModelImpl();
-  List<DayTimeSlotVO>? daytimeSlotVOList;
-  String date =
-      '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
-  TimeSlotsVO? timeSlotsVO;
-  DayTimeSlotVO? dayTimeSlotVO;
-  String dateTime = DateTime.now().toString();
-  @override
-  void initState() {
-
-movieBookingModel.getDayTimeSlotsListFromDataBase(widget.movieVO.id ?? 0, movieBookingModel.getToken() ?? '', date).listen((value) {
-  setState(() {
-    daytimeSlotVOList = value?.daytimeSlotVOList??[];
-  });
-},
-  onError: (error)=>print(error)
-);
-
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: main_screen_color,
-          leading: const BackButtonView(),
-        ),
-        body:  Container(
-                child: SingleChildScrollView(
-                  child: daytimeSlotVOList?.isEmpty??true?const Center(child: CircularProgressIndicator(),):PickTimeCinemaSessionView(
-                    onClick: () => _navigateToSeatScreenView(context),
-                    dayTimeSlotVO: daytimeSlotVOList ?? [],
-                    onDateChange: (date) => _onDateChange(date),
-                    onTap: (timeSlots) => _selectTimeSlot(timeSlots),
-                  ),
-                ),
-              ));
+    return ChangeNotifierProvider(
+      create: (_) => PickTimeAndCinemaBloc(movieVO.id ?? 0),
+      child: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: main_screen_color,
+            leading: const BackButtonView(),
+          ),
+          body: Container(
+            child: Selector<PickTimeAndCinemaBloc, List<DayTimeSlotVO>?>(
+              selector: (_, bloc) => bloc.getDayTimeSlotsVO,
+              builder: (_, dayTimeSlots, child) => SingleChildScrollView(
+                child: dayTimeSlots?.isEmpty ?? true
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Selector<PickTimeAndCinemaBloc, bool>(
+                        selector: (_, bloc) => bloc.getRefreshStatus,
+                        builder: (_, refresh, child) => Selector<
+                                PickTimeAndCinemaBloc, TimeSlotsVO?>(
+                            selector: (_, bloc) => bloc.getTimeSlotsVO,
+                            builder: (_, timeSLots, child) => Selector<
+                                    PickTimeAndCinemaBloc, String>(
+                                selector: (_, bloc) => bloc.getDateTime,
+                                builder: (_, dateTime, child) => Selector<
+                                        PickTimeAndCinemaBloc, DayTimeSlotVO?>(
+                                      selector: (_, bloc) => bloc.getDaySlotsVO,
+                                      builder: (_, daySlots, child) {
+                                        PickTimeAndCinemaBloc
+                                            pickTimeAndCinemaBloc =
+                                            Provider.of(_, listen: false);
+                                        return PickTimeCinemaSessionView(
+                                          onClick: () {
+
+                                            pickTimeAndCinemaBloc
+                                                .checkIfDateIsSelectOrNot()
+                                                .then((status) {
+                                              _navigateToSeatScreenView(
+                                                status: status,
+                                                context: context,
+                                                timeSlotsVO: status?.subTimeSlots??TimeSlotsVO.normal(),
+                                                dateTime: dateTime,
+                                                dayTimeSlotVO:status??
+                                                    DayTimeSlotVO.normal(),
+                                              );
+                                            });
+                                          },
+                                          dayTimeSlotVO: dayTimeSlots ?? [],
+                                          onDateChange: (date) =>
+                                              pickTimeAndCinemaBloc
+                                                  .onDateChange(date,
+                                                      movieVO.id ?? 0),
+                                          onTap: (timeSlots) =>
+                                              pickTimeAndCinemaBloc
+                                                  .selectTimeSlot(timeSlots),
+                                        );
+                                      },
+                                    )))),
+              ),
+            ),
+          )),
+    );
   }
 
   void _onDateChange(date) {
-  String tempDate='${date.year}-${date.month}-${date.day}';
-    setState(() {
-      dateTime = date.toString();
-      this.date = date.toString().substring(0, 10);
-      movieBookingModel.getDayTimeSlotsListFromDataBase(widget.movieVO.id ?? 0, movieBookingModel.getToken() ?? '', tempDate).listen((value) {
-        setState(() {
-          daytimeSlotVOList = value?.daytimeSlotVOList??[];
-        });
-      },
-          onError: (error)=>print(error)
-      );
-      daytimeSlotVOList?.forEach((element1) {
-        element1.timeSlots?.forEach((element2) {
-          element2.isSelect = false;
-        });
-      });
-    });
+    // String tempDate = '${date.year}-${date.month}-${date.day}';
+    // setState(() {
+    //   dateTime = date.toString();
+    //   this.date = date.toString().substring(0, 10);
+    //   movieBookingModel
+    //       .getDayTimeSlotsListFromDataBase(widget.movieVO.id ?? 0,
+    //           movieBookingModel.getToken() ?? '', tempDate)
+    //       .listen((value) {
+    //     setState(() {
+    //       daytimeSlotVOList = value?.daytimeSlotVOList ?? [];
+    //     });
+    //   }, onError: (error) => print(error));
+    //   daytimeSlotVOList?.forEach((element1) {
+    //     element1.timeSlots?.forEach((element2) {
+    //       element2.isSelect = false;
+    //     });
+    //   });
+    // });
   }
 
   void _selectTimeSlot(TimeSlotsVO timeSlotsVO) {
-    setState(() {
-      daytimeSlotVOList?.forEach((element1) {
-        element1.timeSlots?.forEach((element2) {
-          if (element2 == timeSlotsVO) {
-            element2.isSelect = true;
-          } else {
-            element2.isSelect = false;
-          }
-        });
-      });
-    });
+    // setState(() {
+    //   daytimeSlotVOList?.forEach((element1) {
+    //     element1.timeSlots?.forEach((element2) {
+    //       if (element2 == timeSlotsVO) {
+    //         element2.isSelect = true;
+    //       } else {
+    //         element2.isSelect = false;
+    //       }
+    //     });
+    //   });
+    // });
   }
 
   _showALertBox(context, String message, String subMessage) async {
@@ -118,26 +140,22 @@ movieBookingModel.getDayTimeSlotsListFromDataBase(widget.movieVO.id ?? 0, movieB
         });
   }
 
-  void _navigateToSeatScreenView(context) {
-    String message = '';
-    daytimeSlotVOList?.forEach((element1) {
-      element1.timeSlots?.forEach((element2) {
-        if (element2.isSelect) {
-          dayTimeSlotVO = element1;
-          timeSlotsVO = element2;
-          message = 'Success';
-        }
-      });
-    });
-    if (message.isEmpty) {
+  void _navigateToSeatScreenView(
+      {required DayTimeSlotVO? status,
+      required BuildContext context,
+      required TimeSlotsVO timeSlotsVO,
+      required String dateTime,
+      required DayTimeSlotVO dayTimeSlotVO}) {
+    if (status == null) {
       _showALertBox(context, 'Error', 'Please choose one timeslots');
     } else {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+
         return SeatingTicketScreen(
-          dayTimeSlotVO: dayTimeSlotVO ?? DayTimeSlotVO.normal(),
-          timeSlotsVO: timeSlotsVO ?? TimeSlotsVO.normal(),
+          dayTimeSlotVO: dayTimeSlotVO,
+          timeSlotsVO: timeSlotsVO,
           date: dateTime,
-          movieVO: widget.movieVO,
+          movieVO: movieVO,
         );
       }));
     }
@@ -149,11 +167,13 @@ class PickTimeCinemaSessionView extends StatelessWidget {
   final List<DayTimeSlotVO> dayTimeSlotVO;
   final Function(DateTime) onDateChange;
   final Function(TimeSlotsVO) onTap;
+
   PickTimeCinemaSessionView(
       {required this.onClick,
       required this.dayTimeSlotVO,
       required this.onDateChange,
       required this.onTap});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -164,10 +184,14 @@ class PickTimeCinemaSessionView extends StatelessWidget {
           MovieChooseDateView(
             onDateChange: (date) => onDateChange(date),
           ),
-          dayTimeSlotVO.isEmpty?const Center(child:  CircularProgressIndicator(),):ChooseItemGridSession(
-            dayTimeSlotVO: dayTimeSlotVO,
-            onTap: (obj) => onTap(obj),
-          ),
+          dayTimeSlotVO.isEmpty
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : ChooseItemGridSession(
+                  dayTimeSlotVO: dayTimeSlotVO,
+                  onTap: (obj) => onTap(obj),
+                ),
           const SizedBox(
             height: margin_medium_2x,
           ),
@@ -187,8 +211,10 @@ class PickTimeCinemaSessionView extends StatelessWidget {
 
 class ChooseItemGridSession extends StatelessWidget {
   ChooseItemGridSession({required this.dayTimeSlotVO, required this.onTap});
+
   final List<DayTimeSlotVO> dayTimeSlotVO;
   final Function(TimeSlotsVO) onTap;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -211,6 +237,7 @@ class ChooseItemGridSession extends StatelessWidget {
 class ChooseItemGridView extends StatelessWidget {
   final DayTimeSlotVO dayTimeSlotVO;
   final Function(TimeSlotsVO) onTap;
+
   ChooseItemGridView({required this.dayTimeSlotVO, required this.onTap});
 
   @override
@@ -240,6 +267,7 @@ class ChooseItemGridView extends StatelessWidget {
 class CinemaSeatGridSessionView extends StatelessWidget {
   final List<TimeSlotsVO> timeSlotVO;
   final Function(TimeSlotsVO) onTap;
+
   CinemaSeatGridSessionView({required this.timeSlotVO, required this.onTap});
 
   @override
@@ -264,6 +292,7 @@ class CinemaSeatGridSessionView extends StatelessWidget {
 class MovieSeatDetailsView extends StatelessWidget {
   final TimeSlotsVO timeSlotsVO;
   final Function(TimeSlotsVO) onTap;
+
   MovieSeatDetailsView({required this.timeSlotsVO, required this.onTap});
 
   @override
@@ -327,7 +356,6 @@ class CinemaDateChooseSessionView extends StatelessWidget {
             initialSelectedDate: DateTime.now(),
             selectionColor: main_screen_color,
             selectedTextColor: white_color,
-
             onDateChange: (date) => onDateChange(date)),
       ],
     );

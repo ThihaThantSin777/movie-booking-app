@@ -91,4 +91,43 @@ CastCrewVO.normal();
   String toString() {
     return 'CastCrewVO{adult: $adult, gender: $gender, id: $id, knownForDepartment: $knownForDepartment, name: $name, originalName: $originalName, popularity: $popularity, profilePath: $profilePath, castId: $castId, creditId: $creditId, character: $character, order: $order, department: $department, job: $job}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CastCrewVO &&
+          runtimeType == other.runtimeType &&
+          adult == other.adult &&
+          gender == other.gender &&
+          id == other.id &&
+          knownForDepartment == other.knownForDepartment &&
+          name == other.name &&
+          originalName == other.originalName &&
+          popularity == other.popularity &&
+          profilePath == other.profilePath &&
+          castId == other.castId &&
+          creditId == other.creditId &&
+          character == other.character &&
+          order == other.order &&
+          department == other.department &&
+          job == other.job &&
+          castList == other.castList;
+
+  @override
+  int get hashCode =>
+      adult.hashCode ^
+      gender.hashCode ^
+      id.hashCode ^
+      knownForDepartment.hashCode ^
+      name.hashCode ^
+      originalName.hashCode ^
+      popularity.hashCode ^
+      profilePath.hashCode ^
+      castId.hashCode ^
+      creditId.hashCode ^
+      character.hashCode ^
+      order.hashCode ^
+      department.hashCode ^
+      job.hashCode ^
+      castList.hashCode;
 }

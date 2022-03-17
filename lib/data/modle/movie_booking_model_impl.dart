@@ -225,43 +225,43 @@ class MovieBookingModelImpl extends MovieBookingModel {
   @override
   Stream<List<MovieVO>?> getNowPlayingMovieModleFromDataBase(String apiKey, String language, int page) {
     getNowPlayingMovieModle(apiKey, language, page);
-    return movieDAO.getMovieStream().startWith(movieDAO.getNowPlayingMoviesStream()).combineLatest(movieDAO.getNowPlayingMoviesStream(), (_, movies) => movies as List<MovieVO>);
+    return movieDAO.getMovieStream().startWith(movieDAO.getNowPlayingMoviesStream()).map((event) => movieDAO.getAllMovieList().where((element) => element.isNowShowing??false).toList());
   }
 
   @override
   Stream<List<MovieVO>?> getComingSoonMovieModleFromDataBase(String apiKey, String language, int page) {
    getComingSoonMovieModle(apiKey, language, page);
-   return movieDAO.getMovieStream().startWith(movieDAO.getComingSoonMoviesStream()).combineLatest(movieDAO.getComingSoonMoviesStream(), (_, movies) => movies as List<MovieVO>);
+   return movieDAO.getMovieStream().startWith(movieDAO.getComingSoonMoviesStream()).map((event) => movieDAO.getAllMovieList().where((element) => element.isComingSoon??false).toList());
   }
 
   @override
   Stream<MovieVO?> getMovieDetailsFromDataBase(int movieID, String apiKey, String language) {
   getMovieDeatilsModle(movieID, apiKey, language);
-    return movieDAO.getMovieStream().startWith(movieDAO.getMovieStreamByID(movieID)).combineLatest(movieDAO.getMovieStreamByID(movieID), (_, movie) => movie as MovieVO);
+  return movieDAO.getMovieStream().startWith(movieDAO.getMovieStreamByID(movieID)).map((event) => movieDAO.getMoviesByID(movieID));
   }
 
   @override
   Stream<CastCrewVO?> getActorListFromDataBase(int movieID,String apiKey,String language) {
     getMovieCastList(movieID, apiKey, language);
-    return actorDAO.getActorStream().startWith(actorDAO.getAllActorStream(movieID)).combineLatest(actorDAO.getAllActorStream(movieID), (_, actors) => actors as CastCrewVO);
+    return actorDAO.getActorStream().startWith(actorDAO.getAllActorStream(movieID)).map((event) => actorDAO.getActorListByID(movieID));
   }
 
   @override
   Stream<List<SnackAndPaymentVO>?> getSnackListFromDataBase(String authorization) {
     getSnackList(authorization);
-    return snackDAO.getSnackStream().startWith(snackDAO.getSnackListStream()).combineLatest(snackDAO.getSnackListStream(), (_, snacks) => snacks as List<SnackAndPaymentVO>);
+    return snackDAO.getSnackStream().startWith(snackDAO.getSnackListStream()).map((event) => snackDAO.getSnackList());
   }
 
   @override
   Stream<List<SnackAndPaymentVO>?> getPaymentListFromDataBase(String authorization) {
     getPaymentMethodsList(authorization);
-    return paymentDAO.getPaymentStream().startWith(paymentDAO.getPaymentListStream()).combineLatest(paymentDAO.getPaymentListStream(), (_, payments) => payments as List<SnackAndPaymentVO>);
+    return paymentDAO.getPaymentStream().startWith(paymentDAO.getPaymentListStream()).map((event) => paymentDAO.getPaymentList());
   }
 
   @override
   Stream<DayTimeSlotVO?> getDayTimeSlotsListFromDataBase( int movieID, String authorization,String date) {
     getDayTimeSlotsList(movieID, date, authorization);
-    return dayTimeTimeSlotsDao.getDayTimeSlotsStream().startWith(dayTimeTimeSlotsDao.getDayTimeSlotsByDateStream(date)).combineLatest(dayTimeTimeSlotsDao.getDayTimeSlotsByDateStream(date), (_, dayTimeSlot) => dayTimeSlot as DayTimeSlotVO);
+    return dayTimeTimeSlotsDao.getDayTimeSlotsStream().startWith(dayTimeTimeSlotsDao.getDayTimeSlotsByDateStream(date)).map((event) => dayTimeTimeSlotsDao.getDayTimeSlotsByDate(date));
   }
 
   @override

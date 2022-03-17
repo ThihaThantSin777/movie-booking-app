@@ -23,7 +23,9 @@ class DayTimeSlotVO {
   @HiveField(3)
   List<DayTimeSlotVO>? daytimeSlotVOList;
 
-  DayTimeSlotVO(this.cinemaID, this.cinema, this.timeSlots,{this.daytimeSlotVOList});
+  TimeSlotsVO?subTimeSlots;
+
+  DayTimeSlotVO(this.cinemaID, this.cinema, this.timeSlots,{this.daytimeSlotVOList,this.subTimeSlots});
 
   DayTimeSlotVO.normal();
 
@@ -34,6 +36,25 @@ class DayTimeSlotVO {
 
   @override
   String toString() {
-    return 'DayTimeSlotVO{cinemaID: $cinemaID, cinema: $cinema, timeSlots: $timeSlots}';
+    return 'DayTimeSlotVO{cinemaID: $cinemaID, cinema: $cinema, timeSlots: $timeSlots, daytimeSlotVOList: $daytimeSlotVOList, subTimeSlots: $subTimeSlots}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DayTimeSlotVO &&
+          runtimeType == other.runtimeType &&
+          cinemaID == other.cinemaID &&
+          cinema == other.cinema &&
+          timeSlots == other.timeSlots &&
+          daytimeSlotVOList == other.daytimeSlotVOList &&
+          subTimeSlots == other.subTimeSlots;
+
+  @override
+  int get hashCode =>
+      cinemaID.hashCode ^
+      cinema.hashCode ^
+      timeSlots.hashCode ^
+      daytimeSlotVOList.hashCode ^
+      subTimeSlots.hashCode;
 }

@@ -35,4 +35,34 @@ class CheckoutSnackVO {
       _$CheckoutSnackVOFromJson(json);
 
   Map<String, dynamic> toJson() => _$CheckoutSnackVOToJson(this);
+
+  @override
+  String toString() {
+    return 'CheckoutSnackVO{id: $id, name: $name, description: $description, image: $image, price: $price, unitPrice: $unitPrice, quantity: $quantity, totalPrice: $totalPrice}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CheckoutSnackVO &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          description == other.description &&
+          image == other.image &&
+          price == other.price &&
+          unitPrice == other.unitPrice &&
+          quantity == other.quantity &&
+          totalPrice == other.totalPrice;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      description.hashCode ^
+      image.hashCode ^
+      price.hashCode ^
+      unitPrice.hashCode ^
+      quantity.hashCode ^
+      totalPrice.hashCode;
 }

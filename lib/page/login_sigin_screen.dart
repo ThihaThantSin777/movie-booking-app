@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:movie_booking_app/bloc/login_sigin_bloc.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/user_vo/user_vo.dart';
@@ -12,6 +13,7 @@ import 'package:movie_booking_app/resources/strings.dart';
 import 'package:movie_booking_app/widgets/button_text_widget.dart';
 import 'package:movie_booking_app/widgets/button_widget.dart';
 import 'package:movie_booking_app/widgets/text_form_field_input_widget.dart';
+import 'package:provider/provider.dart';
 
 class LoginSiginScreen extends StatefulWidget {
   const LoginSiginScreen({Key? key}) : super(key: key);
@@ -34,180 +36,15 @@ class _LoginSiginScreenState extends State<LoginSiginScreen> {
   final siginPhoneCOntroller = TextEditingController();
   final siginEmailCOntroller = TextEditingController();
   final siginPasswordCOntroller = TextEditingController();
-  bool isShowLogin = true;
-  bool isShowSignin = false;
-  bool isLoading = false;
+
   String googleAccessToken = '';
   String faceBookAccessToken = '';
   UserVO defaultUser = UserVO.normal();
-  GoogleSiginAuthentication googleSiginAuthentication =
-      GoogleSiginAuthentication();
-  FaceBookSiginAuthentication faceBookSiginAuthentication =
-      FaceBookSiginAuthentication();
 
-  _loginCheck(context) {
-    String message = "";
-    String subMessage = "";
+  _showResult(UserVO? status, message, subMessage,context) {
     if (loginForm.currentState!.validate()) {
-      setState(() {
-        isLoading = true;
-      });
-      print(isLoading);
-      movieBookingModel
-          .getUserLoginStatus(
-              loginEmailCOntroller.text, loginPasswordCOntroller.text)
-          .then((status) {
-        if (status?.token != null) {
-          setState(() {
-            print(status?.token ?? "");
-            message = 'Success';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, status ?? defaultUser);
-          });
-        } else {
-          setState(() {
-            message = 'Error';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, defaultUser);
-          });
-        }
-      }).catchError((error) {
-        setState(() {
-          message = 'Error';
-          subMessage = 'Please check user action again';
-          isLoading = false;
-          _showALertBox(context, message, subMessage, defaultUser);
-        });
-      });
-      print(isLoading);
+      _showALertBox(context, message, subMessage, status ?? defaultUser);
     }
-  }
-
-  _changeonTap(val) {
-    setState(() {
-      isShowLogin = val == 0 ? true : false;
-      isShowSignin = val == 1 ? true : false;
-    });
-  }
-
-  _loginWithGoogle(context) {
-    String message = "";
-    String subMessage = "";
-    googleSiginAuthentication.gooleSigin().then((value) {
-      print('Google Login ID ${value?.id}');
-
-      movieBookingModel.loginWithGoogle(value?.id ?? '').then((status) {
-        if (status?.token != null) {
-          setState(() {
-            message = 'Success';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, status ?? defaultUser);
-          });
-        } else {
-          setState(() {
-            message = 'Error';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, defaultUser);
-          });
-        }
-      }).catchError((error) => print(error));
-    }).catchError((error) => print(error));
-  }
-
-  _loginWithFaceBook(context) {
-    String message = "";
-    String subMessage = "";
-    faceBookSiginAuthentication.loginWithFacebook().then((result) {
-      print('Facebook Login ID ${result.accessToken?.userId}');
-      movieBookingModel
-          .loginWithFacebook(result.accessToken?.userId ?? '')
-          .then((status) {
-        if (status?.token != null) {
-          setState(() {
-            message = 'Success';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, status ?? defaultUser);
-          });
-        } else {
-          setState(() {
-            message = 'Error';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, defaultUser);
-          });
-        }
-      }).catchError((error) => print(error));
-    }).catchError((error) => print(error));
-  }
-
-  _siginCheck(context) {
-    UserVO defaultUsaer = UserVO.normal();
-    String message = "";
-    String subMessage = "";
-    if (siginForm.currentState!.validate()) {
-      setState(() {
-        isLoading = true;
-      });
-      movieBookingModel
-          .getUserRegisterStatus(
-              siginNameCOntroller.text,
-              siginEmailCOntroller.text,
-              siginPhoneCOntroller.text,
-              siginPasswordCOntroller.text,
-              googleAccessToken,
-              faceBookAccessToken)
-          .then((status) {
-        if (status?.token != null) {
-          setState(() {
-            message = 'Success';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, status ?? defaultUsaer);
-          });
-        } else {
-          setState(() {
-            message = 'Error';
-            subMessage = status?.message ?? "";
-            isLoading = false;
-            _showALertBox(context, message, subMessage, defaultUsaer);
-          });
-        }
-      }).catchError((error) {
-        setState(() {
-          message = 'Error';
-          subMessage = 'Please check user action again';
-          isLoading = false;
-          _showALertBox(context, message, subMessage, defaultUsaer);
-        });
-      });
-    }
-  }
-
-  _googleSigin() {
-    googleSiginAuthentication.gooleSigin().then((value) {
-      googleAccessToken = value?.id ?? '';
-      print('Sigin Google ID ${value?.id}');
-      setState(() {
-        siginNameCOntroller.text = value?.displayName ?? '';
-        siginEmailCOntroller.text = value?.email ?? '';
-      });
-    }).catchError((error) => print(error));
-  }
-
-  _faceBookSigin() async {
-    faceBookSiginAuthentication.loginWithFacebook().then((result) {
-      print('Facebook Sigin ID ${result.accessToken?.userId}');
-      faceBookAccessToken = result.accessToken?.userId ?? '';
-      FacebookAuth.i.getUserData().then((userData) {
-        siginEmailCOntroller.text = userData['email'];
-        siginNameCOntroller.text = userData['name'];
-      }).catchError((error) => print(error));
-    }).catchError((error) => print(error));
   }
 
   _showALertBox(
@@ -234,7 +71,7 @@ class _LoginSiginScreenState extends State<LoginSiginScreen> {
       movieBookingModel.saveUserInfo(userVO);
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (context) {
-        return const HomeScreeen();
+        return  HomeScreen();
       }));
     }
   }
@@ -252,60 +89,169 @@ class _LoginSiginScreenState extends State<LoginSiginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Visibility(
-            visible: isLoading,
-            child: Positioned.fill(
+    return ChangeNotifierProvider<LoginSiginBloc>(
+      create: (_) => LoginSiginBloc(),
+      child: Scaffold(
+        body: Selector<LoginSiginBloc, bool>(
+          selector: (_, bloc) => bloc.isLoading,
+          builder: (_, isLoading, child) => Stack(
+            children: [
+              Visibility(
+                visible: isLoading,
+                child: Positioned.fill(
+                    child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black12.withOpacity(0.4),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                  ),
+                )),
+              ),
+              IgnorePointer(
+                ignoring: isLoading,
                 child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Colors.black12.withOpacity(0.4),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
+                  margin: const EdgeInsets.only(
+                      top: margin_large,
+                      left: spacing_micro_1x,
+                      right: spacing_micro_1x),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const LoginSiginTitleSession(),
+                      Selector<LoginSiginBloc, bool>(
+                          selector: (_, bloc) => bloc.isShowLogin,
+                          builder: (_, isShowLogin, child) => Selector<
+                                  LoginSiginBloc, bool>(
+                              selector: (_, bloc) => bloc.isShowSigin,
+                              builder: (_, isShowSigin, child) {
+                                LoginSiginBloc loginSiginBloc =
+                                    Provider.of(_, listen: false);
+                                return LoginSiginTabBarSession(
+                                  tabs: tabs,
+                                  loginForm: loginForm,
+                                  siginForm: siginForm,
+                                  loginEmailCOntroller: loginEmailCOntroller,
+                                  loginPasswordCOntroller:
+                                      loginPasswordCOntroller,
+                                  siginNameCOntroller: siginNameCOntroller,
+                                  siginPhoneCOntroller: siginPhoneCOntroller,
+                                  siginEmailCOntroller: siginEmailCOntroller,
+                                  siginPasswordCOntroller:
+                                      siginPasswordCOntroller,
+                                  loginClick: () {
+                                    loginSiginBloc
+                                        .getUserLoginStatusBloc(
+                                            loginEmailCOntroller.text,
+                                            loginPasswordCOntroller.text)
+                                        .then((user) {
+                                      loginSiginBloc.updateLoading = false;
+                                      if (user?.token != null) {
+                                        _showResult(user, 'Success',
+                                            user?.message ?? "",context);
+                                      } else {
+                                        _showResult(
+                                            user, 'Error', user?.message ?? "",context);
+                                      }
+                                    }).catchError((error) {
+                                      _showResult(defaultUser, 'Error',
+                                          'Please check user action again',context);
+                                    });
+                                  },
+                                  siginOnClick: () {
+                                    loginSiginBloc
+                                        .getUserRegisterStatusBloc(
+                                            siginNameCOntroller.text,
+                                            siginEmailCOntroller.text,
+                                            siginPhoneCOntroller.text,
+                                            siginPasswordCOntroller.text,
+                                            googleAccessToken,
+                                            faceBookAccessToken)
+                                        .then((user) {
+                                      loginSiginBloc.updateLoading = false;
+                                      if (user?.token != null) {
+                                        _showResult(user, 'Success',
+                                            user?.message ?? "",context);
+                                      } else {
+                                        _showResult(
+                                            user, 'Error', user?.message ?? "",context);
+                                      }
+                                    }).catchError((error) {
+                                      _showResult(defaultUser, 'Error',
+                                          'Please check user action again',context);
+                                    });
+                                  },
+                                  isShowLogin: isShowLogin,
+                                  isShowSignIn: isShowSigin,
+                                  onTap: (val) {
+                                    loginSiginBloc
+                                        .onTapTabBarChange(val as int);
+                                  },
+                                  siginWithGoogle: () => loginSiginBloc
+                                      .googleSigin()
+                                      .then((value) {
+                                    googleAccessToken = value?.id ?? '';
+                                    siginNameCOntroller.text =
+                                        value?.displayName ?? '';
+                                    siginEmailCOntroller.text =
+                                        value?.email ?? '';
+                                  }).catchError((error) => print(error)),
+                                  siginWithFaceBook: () => loginSiginBloc
+                                      .faceBookSigin()
+                                      .then((result) {
+                                    faceBookAccessToken =
+                                        result.accessToken?.userId ?? '';
+                                    FacebookAuth.i
+                                        .getUserData()
+                                        .then((userData) {
+                                      siginEmailCOntroller.text =
+                                          userData['email'];
+                                      siginNameCOntroller.text =
+                                          userData['name'];
+                                    }).catchError((error) => print(error));
+                                  }).catchError((error) => print(error)),
+                                  loginWithGoogle: () => loginSiginBloc
+                                      .loginWithGoogle()
+                                      .then((user) {
+                                    loginSiginBloc.updateLoading = false;
+                                    if (user?.token != null) {
+                                      _showResult(
+                                          user, 'Success', user?.message ?? "",context);
+                                    } else {
+                                      _showResult(
+                                          user, 'Error', user?.message ?? "",context);
+                                    }
+                                  }).catchError((error) {
+                                    _showResult(defaultUser, 'Error',
+                                        'Please check user action again',context);
+                                  }),
+                                  loginWithFacebook:  () => loginSiginBloc
+                                      .loginWithFaceBook()
+                                      .then((user) {
+                                    loginSiginBloc.updateLoading = false;
+                                    if (user?.token != null) {
+                                      _showResult(
+                                          user, 'Success', user?.message ?? "",context);
+                                    } else {
+                                      _showResult(
+                                          user, 'Error', user?.message ?? "",context);
+                                    }
+                                  }).catchError((error) {
+                                    _showResult(defaultUser, 'Error',
+                                        'Please check user action again',context);
+                                  }),
+                                );
+                              }))
+                    ],
+                  ),
                 ),
               ),
-            )),
+            ],
           ),
-          IgnorePointer(
-            ignoring: isLoading,
-            child: Container(
-              margin: const EdgeInsets.only(
-                  top: margin_large,
-                  left: spacing_micro_1x,
-                  right: spacing_micro_1x),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const LoginSiginTitleSession(),
-                  LoginSiginTabBarSession(
-                    tabs: tabs,
-                    loginForm: loginForm,
-                    siginForm: siginForm,
-                    loginEmailCOntroller: loginEmailCOntroller,
-                    loginPasswordCOntroller: loginPasswordCOntroller,
-                    siginNameCOntroller: siginNameCOntroller,
-                    siginPhoneCOntroller: siginPhoneCOntroller,
-                    siginEmailCOntroller: siginEmailCOntroller,
-                    siginPasswordCOntroller: siginPasswordCOntroller,
-                    loginClick: () => _loginCheck(context),
-                    siginOnClick: () => _siginCheck(context),
-                    isShowLogin: isShowLogin,
-                    isShowSignIn: isShowSignin,
-                    onTap: (val) => _changeonTap(val),
-                    siginWithGoogle: () => _googleSigin(),
-                    siginWithFaceBook: () => _faceBookSigin(),
-                    loginWithGoogle: () => _loginWithGoogle(context),
-                    loginWithFacebook: () => _loginWithFaceBook(context),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -487,6 +433,7 @@ class LoginView extends StatelessWidget {
   final Function loginWithFacebook;
   final TextEditingController loginEmailCOntroller;
   final TextEditingController loginPasswordCOntroller;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -579,6 +526,7 @@ class SiginView extends StatelessWidget {
   final TextEditingController siginPhoneCOntroller;
   final TextEditingController siginEmailCOntroller;
   final TextEditingController siginPasswordCOntroller;
+
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -25,4 +25,21 @@ class SpokenLanguages {
       _$SpokenLanguagesFromJson(json);
 
   Map<String, dynamic> toJson() => _$SpokenLanguagesToJson(this);
+
+  @override
+  String toString() {
+    return 'SpokenLanguages{englishName: $englishName, iso6391: $iso6391, name: $name}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SpokenLanguages &&
+          runtimeType == other.runtimeType &&
+          englishName == other.englishName &&
+          iso6391 == other.iso6391 &&
+          name == other.name;
+
+  @override
+  int get hashCode => englishName.hashCode ^ iso6391.hashCode ^ name.hashCode;
 }

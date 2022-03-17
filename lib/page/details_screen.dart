@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:movie_booking_app/bloc/details_bloc.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/cast_crew_vo/cast_crew_vo.dart';
@@ -7,119 +8,103 @@ import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
 import 'package:movie_booking_app/network/api_constant/api_constant.dart';
 import 'package:movie_booking_app/page/home_screen.dart';
 import 'package:movie_booking_app/page/pick_time_and_cinema_screen.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';
 import 'package:movie_booking_app/widgets/back_button_widget.dart';
 import 'package:movie_booking_app/widgets/button_text_widget.dart';
 import 'package:movie_booking_app/widgets/button_widget.dart';
 import 'package:movie_booking_app/widgets/header_title.dart';
+import 'package:provider/provider.dart';
 
-class MovieDetailsScreen extends StatefulWidget {
+class MovieDetailsScreen extends StatelessWidget {
   final int movieID;
 
   MovieDetailsScreen({
     required this.movieID,
   });
 
-  @override
-  State<MovieDetailsScreen> createState() => _MovieDetailsScreenState();
-}
-
-class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
-  MovieVO? movieVO;
-  MovieBookingModel movieBookingModel = MovieBookingModelImpl();
   final String unKnownUrl =
       'https://cdn4.iconfinder.com/data/icons/political-elections/50/48-1024.png';
-  List<CastCrewVO>? castCrewVO;
 
-  _navigatorToSeatingChartView(context) {
+  _navigatorToSeatingChartView(context, movieVO) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
       return PickTimeAndCinema(
-        movieVO: movieVO ?? MovieVO.normal(),
+        movieVO: movieVO,
       );
     }));
   }
 
   @override
-  void initState() {
-
-    movieBookingModel.getMovieDetailsFromDataBase(widget.movieID, API_KEY, LANGUAGE).listen((movie) {
-      setState(() {
-        movieVO = movie;
-      });
-    },
-      onError: (error)=>print(error)
-    );
-
-   movieBookingModel.getActorListFromDataBase(widget.movieID, API_KEY, LANGUAGE).listen((cast) {
-     setState(() {
-       castCrewVO=cast?.castList??[];
-     });
-   },
-     onError: (error)=>print(error)
-   );
-
-
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: medium_large_2x),
-        child: PinnedButtonView(
-          onClick: () => _navigatorToSeatingChartView(context),
-        ),
-      ),
-      body: movieVO == null
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  backgroundColor: Colors.transparent,
-                  expandedHeight: sliver_app_bar_height,
-                  flexibleSpace: FlexibleSpaceBar(
-                      collapseMode: CollapseMode.pin,
-                      background: Stack(
-                        children: [
-                          Positioned.fill(
-                              child: SliverAppBarImageView(
-                                  imageUrl: movieVO?.posterPath == null
-                                      ? unKnownUrl
-                                      : '$BASE_IMAGE_URL${movieVO?.posterPath}')),
-                          const Align(
-                            alignment: Alignment.bottomCenter,
-                            child: BorderOnlyView(),
-                          ),
-                          const Align(
-                            alignment: Alignment.center,
-                            child: PlayButtonView(),
-                          ),
-                          const Positioned(
-                              top: back_button_size, child: BackButtonView()),
-                        ],
-                      )),
+    return ChangeNotifierProvider(
+      create: (_) => DetailsBloc(movieID),
+      child: Selector<DetailsBloc, MovieVO?>(
+          selector: (_, bloc) => bloc.getMovieVO,
+          builder: (_, movieVO, child) => Scaffold(
+                bottomNavigationBar: Padding(
+                  padding: const EdgeInsets.only(bottom: medium_large_2x),
+                  child: PinnedButtonView(
+                    onClick: () =>
+                        _navigatorToSeatingChartView(context, movieVO),
+                  ),
                 ),
-                SliverList(
-                    delegate: SliverChildListDelegate(
-                        [
-                  castCrewVO?.isEmpty??true?const Center(child: CircularProgressIndicator(),):MovieDetailsBodyView(
-                    title: movieVO?.originalTitle ?? "Un Known",
-                    runtime: '${movieVO?.runtime.toString()}m',
-                    imd: movieVO?.voteAverage.toString() ?? 'Default',
-                    type: movieVO?.getGenreListAsStringList() ?? [],
-                    moviePlotSummary: movieVO?.overview ?? 'Default',
-                    castCrewVO: castCrewVO ?? [],
-                  )
-                ]
-                    ))
-              ],
-            ),
+                body: movieVO == null
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : CustomScrollView(
+                        slivers: [
+                          SliverAppBar(
+                            automaticallyImplyLeading: false,
+                            backgroundColor: Colors.transparent,
+                            expandedHeight: sliver_app_bar_height,
+                            flexibleSpace: FlexibleSpaceBar(
+                                collapseMode: CollapseMode.pin,
+                                background: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                        child: SliverAppBarImageView(
+                                            imageUrl: movieVO.posterPath == null
+                                                ? unKnownUrl
+                                                : '$BASE_IMAGE_URL${movieVO.posterPath}')),
+                                    const Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: BorderOnlyView(),
+                                    ),
+                                    const Align(
+                                      alignment: Alignment.center,
+                                      child: PlayButtonView(),
+                                    ),
+                                    const Positioned(
+                                        top: back_button_size,
+                                        child: BackButtonView()),
+                                  ],
+                                )),
+                          ),
+                          Selector<DetailsBloc, List<CastCrewVO>?>(
+                            selector: (_, bloc) => bloc.getCastCrewVO,
+                            builder: (_, castCrewVO, child) => SliverList(
+                                delegate: SliverChildListDelegate([
+                              castCrewVO?.isEmpty ?? true
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : MovieDetailsBodyView(
+                                      title:
+                                          movieVO.originalTitle ?? "Un Known",
+                                      runtime:
+                                          '${movieVO.runtime.toString()} m',
+                                      imd: movieVO.voteAverage.toString(),
+                                      type: movieVO.getGenreListAsStringList(),
+                                      moviePlotSummary:
+                                          movieVO.overview ?? 'Default',
+                                      castCrewVO: castCrewVO ?? [],
+                                    )
+                            ])),
+                          )
+                        ],
+                      ),
+              )),
     );
   }
 }
@@ -131,6 +116,7 @@ class MovieDetailsBodyView extends StatelessWidget {
   final List<String> type;
   final String moviePlotSummary;
   final List<CastCrewVO> castCrewVO;
+
   MovieDetailsBodyView({
     required this.title,
     required this.runtime,
@@ -214,9 +200,11 @@ class MovieDetailsColumnView extends StatelessWidget {
 
 class ActorAndTitleView extends StatelessWidget {
   ActorAndTitleView({required this.castCrewVO});
+
   final List<CastCrewVO> castCrewVO;
   final String unKnownUrl =
       'https://cdn4.iconfinder.com/data/icons/political-elections/50/48-1024.png';
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -398,6 +386,7 @@ class MovieTypeView extends StatelessWidget {
 
 class MovieTypeChipView extends StatelessWidget {
   final String chipText;
+
   MovieTypeChipView(this.chipText);
 
   @override
@@ -540,6 +529,7 @@ class MovieTitleView extends StatelessWidget {
 
 class PinnedButtonView extends StatelessWidget {
   final Function onClick;
+
   PinnedButtonView({required this.onClick});
 
   @override

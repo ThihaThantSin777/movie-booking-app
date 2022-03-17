@@ -45,5 +45,26 @@ class SnackAndPaymentVO {
     return 'SnackAndPaymentVO{id: $id, name: $name, description: $description, price: $price, image: $image, quantity: $quantity, isSelect: $isSelect}';
   }
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SnackAndPaymentVO &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          description == other.description &&
+          price == other.price &&
+          image == other.image &&
+          quantity == other.quantity &&
+          isSelect == other.isSelect;
 
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      description.hashCode ^
+      price.hashCode ^
+      image.hashCode ^
+      quantity.hashCode ^
+      isSelect.hashCode;
 }

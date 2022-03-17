@@ -33,4 +33,25 @@ class SeatinTypeVO {
   String toString() {
     return 'SeatinTypeVO{id: $id, type: $type, seatName: $seatName, symbol: $symbol, price: $price, isSelect: $isSelect}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SeatinTypeVO &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          type == other.type &&
+          seatName == other.seatName &&
+          symbol == other.symbol &&
+          price == other.price &&
+          isSelect == other.isSelect;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      type.hashCode ^
+      seatName.hashCode ^
+      symbol.hashCode ^
+      price.hashCode ^
+      isSelect.hashCode;
 }

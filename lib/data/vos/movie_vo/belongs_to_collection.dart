@@ -31,4 +31,23 @@ class BelongsToCollection {
       _$BelongsToCollectionFromJson(json);
 
   Map<String, dynamic> toJson() => _$BelongsToCollectionToJson(this);
+
+  @override
+  String toString() {
+    return 'BelongsToCollection{id: $id, name: $name, posterPath: $posterPath, backDropPath: $backDropPath}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BelongsToCollection &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          posterPath == other.posterPath &&
+          backDropPath == other.backDropPath;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^ name.hashCode ^ posterPath.hashCode ^ backDropPath.hashCode;
 }

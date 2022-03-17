@@ -16,4 +16,20 @@ class MovieVODate {
       _$MovieVODateFromJson(json);
 
   Map<String, dynamic> toJson() => _$MovieVODateToJson(this);
+
+  @override
+  String toString() {
+    return 'MovieVODate{maximum: $maximum, minimum: $minimum}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MovieVODate &&
+          runtimeType == other.runtimeType &&
+          maximum == other.maximum &&
+          minimum == other.minimum;
+
+  @override
+  int get hashCode => maximum.hashCode ^ minimum.hashCode;
 }

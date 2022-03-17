@@ -57,6 +57,6 @@ class MyApp extends StatelessWidget {
         home: Scaffold(
             backgroundColor: main_screen_color,
             body:
-                userDAO.isUserVOEmpty() ? StartScreen() : const HomeScreeen()));
+                userDAO.isUserVOEmpty() ? StartScreen() :  HomeScreen()));
   }
 }

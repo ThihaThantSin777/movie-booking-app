@@ -51,7 +51,7 @@ class CheckoutScreen extends StatelessWidget {
   }
   void _backToPayMentView(context) {
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-      return const HomeScreeen();
+      return  HomeScreen();
     }));
   }
 

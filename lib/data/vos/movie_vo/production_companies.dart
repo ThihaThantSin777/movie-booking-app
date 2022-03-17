@@ -30,4 +30,26 @@ class ProductionCompanies {
       _$ProductionCompaniesFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProductionCompaniesToJson(this);
+
+  @override
+  String toString() {
+    return 'ProductionCompanies{id: $id, logoPath: $logoPath, name: $name, originalCountry: $originalCountry}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProductionCompanies &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          logoPath == other.logoPath &&
+          name == other.name &&
+          originalCountry == other.originalCountry;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      logoPath.hashCode ^
+      name.hashCode ^
+      originalCountry.hashCode;
 }

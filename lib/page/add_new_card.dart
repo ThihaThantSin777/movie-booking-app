@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:movie_booking_app/bloc/add_new_card_bloc.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/persistance/daos/user_dao.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/back_button_widget.dart';
 import '../widgets/button_text_widget.dart';
@@ -24,43 +26,53 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
   final cardNumberController = TextEditingController();
   final cardHolderController = TextEditingController();
   final form = GlobalKey<FormState>();
-  UserDAO userDAO = UserDAO();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return ChangeNotifierProvider(
+      create: (_)=>AddNewCardBloc(),
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButtonView(
-          color: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: const BackButtonView(
+            color: Colors.black,
+          ),
         ),
-      ),
-      body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: margin_small_2x),
-        child: Form(
-          key: form,
-          child: Column(
-            children: [
-              CardNumberView(cardNumberController),
-              const SizedBox(
-                height: margin_medium_3x,
-              ),
-              CardHolderView(cardHolderController),
-              const SizedBox(
-                height: margin_medium_3x,
-              ),
-              ExprationDateAndCVCSession(
-                dateController: dateController,
-                cvcController: cvcController,
-              ),
-              const SizedBox(
-                height: margin_medium_3x,
-              ),
-              ButtonWidget(
-                  onClick: () => _navigateToOriginalScreen(context),
-                  child: ButtonTextView(confirm))
-            ],
+        body: Container(
+          padding: const EdgeInsets.symmetric(horizontal: margin_small_2x),
+          child: Form(
+            key: form,
+            child: Column(
+              children: [
+                CardNumberView(cardNumberController),
+                const SizedBox(
+                  height: margin_medium_3x,
+                ),
+                CardHolderView(cardHolderController),
+                const SizedBox(
+                  height: margin_medium_3x,
+                ),
+                ExprationDateAndCVCSession(
+                  dateController: dateController,
+                  cvcController: cvcController,
+                ),
+                const SizedBox(
+                  height: margin_medium_3x,
+                ),
+                Builder(
+                  builder: (context) {
+                    return ButtonWidget(
+                        onClick: () {
+                          AddNewCardBloc addNewCardBloc=Provider.of(context,listen: false);
+                          _navigateToOriginalScreen(context,addNewCardBloc);
+                        },
+                        child: ButtonTextView(confirm));
+                  }
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -91,21 +103,20 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
     }
   }
 
-  void _navigateToOriginalScreen(context) {
+  void _navigateToOriginalScreen(context, AddNewCardBloc addNewCardBloc) {
     String status = '';
     if (form.currentState!.validate()) {
-      movieBookingModel
+      addNewCardBloc
           .createCard(
-              cardNumberController.text,
-              cardHolderController.text,
-              dateController.text,
-              cvcController.text,
-              userDAO.getAuthorizationToken() ?? '')
+        cardNumber: cardNumberController.text,
+        cardHolder: cardHolderController.text,
+        expirationDate: dateController.text,
+        cvc: cvcController.text,
+      )
           .then((createCardVO) {
-        movieBookingModel.getProfile(movieBookingModel.getToken()??'');
-        status =createCardVO?.message??'';
+        addNewCardBloc.getProfile();
+        status = createCardVO?.message ?? '';
         if (status.isNotEmpty) {
-
           _showALertBox(context, "Success", '1 card added');
         } else {
           _showALertBox(context, "Error", 'Unknown Error');
@@ -118,8 +129,10 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
 class ExprationDateAndCVCSession extends StatelessWidget {
   final TextEditingController dateController;
   final TextEditingController cvcController;
+
   ExprationDateAndCVCSession(
       {required this.dateController, required this.cvcController});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -142,6 +155,7 @@ class CVCView extends StatelessWidget {
   final TextEditingController controller;
 
   CVCView(this.controller);
+
   @override
   Widget build(BuildContext context) {
     return TextFormFieldWidget(
@@ -181,6 +195,7 @@ class ExprationDateView extends StatelessWidget {
 
 class CardHolderView extends StatelessWidget {
   final TextEditingController controller;
+
   CardHolderView(this.controller);
 
   @override
@@ -201,7 +216,9 @@ class CardHolderView extends StatelessWidget {
 
 class CardNumberView extends StatelessWidget {
   final TextEditingController controller;
+
   CardNumberView(this.controller);
+
   @override
   Widget build(BuildContext context) {
     return TextFormFieldWidget(
