@@ -51,10 +51,18 @@ class SnackAndPayMentScreen extends StatelessWidget {
               leading: const BackButtonView(
                 color: Colors.black,
               )),
-          body: Selector<SnackAndPaymentBloc, bool>(
-            selector: (_, bloc) => bloc.isRefresh,
-            builder: (_, refresh, child) => Selector<SnackAndPaymentBloc,
+          body:
+          // Selector<SnackAndPaymentBloc, bool>(
+          //   selector: (_, bloc) => bloc.isRefresh,
+          //   builder: (_, refresh, child) =>
+
+                Selector<SnackAndPaymentBloc,
                     List<SnackAndPaymentVO>?>(
+                  shouldRebuild: (previous,next){
+                    // print('Previous $previous');
+                    // print('Next $next');
+                  return previous!=next;
+                  },
                 selector: (_, bloc) => bloc.getSnackList,
                 builder: (_, snackList, child) {
                   SnackAndPaymentBloc snackPaymentBloc =
@@ -67,13 +75,17 @@ class SnackAndPayMentScreen extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(margin_small_2x),
                           child: SingleChildScrollView(
-                            child: Selector<SnackAndPaymentBloc, bool>(
-                              selector: (_, bloc) => bloc.isRefresh,
-                              builder: (_, refresh, child) => Selector<
-                                  SnackAndPaymentBloc,
-                                  List<SnackAndPaymentVO>?>(
-                                selector: (_, bloc) => bloc.getSnackList,
-                                builder: (_, snackList, child) => Column(
+                            child:
+                            // Selector<SnackAndPaymentBloc, bool>(
+                            //   selector: (_, bloc) => bloc.isRefresh,
+                            //   builder: (_, refresh, child) =>
+                            //
+                            //       Selector<
+                            //       SnackAndPaymentBloc,
+                            //       List<SnackAndPaymentVO>?>(
+                            //     selector: (_, bloc) => bloc.getSnackList,
+                            //     builder: (_, snackList, child) =>
+                                    Column(
                                   children: [
                                     snackList?.isEmpty ?? true
                                         ? const Center(
@@ -98,6 +110,7 @@ class SnackAndPayMentScreen extends StatelessWidget {
                                     ),
                                     Selector<SnackAndPaymentBloc,
                                         List<SnackAndPaymentVO>?>(
+                                      shouldRebuild: (previous,next)=>previous!=next,
                                       selector: (_, bloc) =>
                                           bloc.getPaymentMethodsList,
                                       builder: (_, paymentList, child) =>
@@ -116,8 +129,8 @@ class SnackAndPayMentScreen extends StatelessWidget {
                                     )
                                   ],
                                 ),
-                              ),
-                            ),
+                            //  ),
+                           // ),
                           ),
                         ),
                       ),
@@ -148,7 +161,8 @@ class SnackAndPayMentScreen extends StatelessWidget {
                   );
                 }),
           ),
-        ));
+       // )
+    );
   }
 
 

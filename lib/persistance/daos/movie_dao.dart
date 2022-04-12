@@ -13,8 +13,7 @@ class MovieDAO{
   void saveMovieList(List<MovieVO>movieList){
     Map<int,MovieVO>movies=Map.fromIterable(movieList,key: (movies)=>movies.id,value: (movies)=>movies);
     _getMovieBox().putAll(movies);
-    print('Save movie List');
-    print('');
+
   }
 
   List<MovieVO>getAllMovieList()=>_getMovieBox().values.toList();
@@ -23,15 +22,11 @@ class MovieDAO{
 
   void saveSingleMovieList(MovieVO movieVO){
     _getMovieBox().put(movieVO.id,movieVO);
-    print('Save single movie');
-    print('');
   }
 
   Box<MovieVO>_getMovieBox()=>Hive.box<MovieVO>(BOX_NAME_MOVIE_VO);
 
   Stream<void>getMovieStream(){
-    print('Watch movie Stream');
-    print('');
     return _getMovieBox().watch();
   }
 

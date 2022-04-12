@@ -30,8 +30,13 @@ class DetailsBloc extends ChangeNotifier {
     _movieBookingModel
         .getActorListFromDataBase(movieID, API_KEY, LANGUAGE)
         .listen((cast) {
-      setCastCrewVO = cast?.castList ?? [];
-      notifyListeners();
+          print(cast);
+          if(cast?.castList?.isNotEmpty??false){
+            setCastCrewVO=cast?.castList as List<CastCrewVO>;
+            notifyListeners();
+          }
+
+
     }, onError: (error) => print(error));
   }
 }

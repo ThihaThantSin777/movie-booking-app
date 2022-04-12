@@ -165,8 +165,6 @@ class MovieBookingDataAgentImpl extends MovieBookingDataAgent {
         .checkOut(authorization, checkOutRawResponse)
         .asStream()
         .map((response) {
-      print(response.message);
-      print(response.code);
       return response.data;
     }).first;
   }

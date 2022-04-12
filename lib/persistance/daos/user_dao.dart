@@ -11,8 +11,6 @@ class UserDAO {
 
   void saveUser(UserVO userVO) {
     _getUserBox().put(userVO.id, userVO);
-    print('Save User');
-    print('');
   }
 
     void deleteUser() => _getUserBox().clear();
@@ -28,8 +26,6 @@ class UserDAO {
     Box<UserVO> _getUserBox() => Hive.box<UserVO>(BOX_NAME_USER_VO);
 
     Stream<void>getUserStream() {
-      print('Watch User Stream');
-      print('');
      return  _getUserBox().watch();
     }
 

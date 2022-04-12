@@ -15,8 +15,6 @@ class PaymentDAO{
   void savePayment(List<SnackAndPaymentVO>paymentList){
     Map<int,SnackAndPaymentVO>payments=Map.fromIterable(paymentList,key: (paymentID)=>paymentID.id,value: (payment)=>payment);
     getPaymentBox().putAll(payments);
-    print('Save Payment');
-    print('');
   }
 
   List<SnackAndPaymentVO>?getPaymentList()=>getPaymentBox().values.toList();
@@ -24,8 +22,6 @@ class PaymentDAO{
   Box<SnackAndPaymentVO>getPaymentBox()=>Hive.box<SnackAndPaymentVO>(BOX_NAME_PAYMENT_VO);
 
   Stream<void>getPaymentStream(){
-    print('Watch payment Stream');
-    print('');
     return getPaymentBox().watch();
   }
 

@@ -57,12 +57,11 @@ class SeatChooseBloc extends ChangeNotifier{
           getSelectSeat.add(element.seatName ?? '');
           setPrice= getPrice+element.price ?? 0;
         } else {
-
           setSeatCount=getSeatCount-1;
           getSelectSeat.remove(element.seatName ?? '');
           setPrice= getPrice-element.price ?? 0;
         }
-      }
+       }
     });
     setSelectSeatName = getSelectSeat.join(',');
     notifyListeners();

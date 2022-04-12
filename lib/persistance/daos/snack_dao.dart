@@ -15,8 +15,6 @@ class SnackDAO{
   void saveSnack(List<SnackAndPaymentVO>snakList){
     Map<int,SnackAndPaymentVO>snacks=Map.fromIterable(snakList,key: (snack)=>snack.id,value: (snack)=>snack);
     getSnackBox().putAll(snacks);
-    print('Save Snacks');
-    print('');
   }
 
   List<SnackAndPaymentVO>?getSnackList()=>getSnackBox().values.toList();
@@ -24,8 +22,6 @@ class SnackDAO{
   Box<SnackAndPaymentVO>getSnackBox()=>Hive.box<SnackAndPaymentVO>(BOX_NAME_SNACK_VO);
 
   Stream<void>getSnackStream(){
-    print('Watch Snack Stream');
-    print('');
     return getSnackBox().watch();
 
   }

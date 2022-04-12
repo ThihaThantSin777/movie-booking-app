@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:movie_booking_app/bloc/add_new_card_bloc.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';
 import 'package:provider/provider.dart';
-
 import '../widgets/back_button_widget.dart';
 import '../widgets/button_text_widget.dart';
 import '../widgets/button_widget.dart';
@@ -88,7 +86,7 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
             title: Text(message),
             content: Text(subMessage),
             actions: [
-              FlatButton(
+              TextButton(
                   onPressed: () {
                     Navigator.of(context)
                         .pop(message == 'Error' ? false : true);

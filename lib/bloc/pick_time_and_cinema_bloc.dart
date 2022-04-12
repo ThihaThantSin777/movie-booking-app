@@ -14,13 +14,11 @@ class PickTimeAndCinemaBloc extends ChangeNotifier{
   TimeSlotsVO? _timeSlotsVO;
   DayTimeSlotVO? _dayTimeSlotVO;
   String _dateTime = DateTime.now().toString();
-  bool _isRefresh=false;
-  get getDayTimeSlotsVO=>_daytimeSlotVOList;
+  List<DayTimeSlotVO>? get getDayTimeSlotsVO=>_daytimeSlotVOList;
   get getDateTime=> _dateTime;
   get getDate=>_date;
   get getTimeSlotsVO=> _timeSlotsVO;
   get getDaySlotsVO=>_dayTimeSlotVO;
-  get getRefreshStatus=>_isRefresh;
 
 
   set setDayTimeSlotsVO(List<DayTimeSlotVO>? daytimeSlotVOList)=>_daytimeSlotVOList=daytimeSlotVOList;
@@ -28,7 +26,6 @@ class PickTimeAndCinemaBloc extends ChangeNotifier{
   set setDate(String date)=>_date=date;
   set setTimeSlotsVO(TimeSlotsVO? timeSlotsVO)=>_timeSlotsVO=timeSlotsVO;
   set setDaySlotsVO(DayTimeSlotVO? daySlotVO)=>_dayTimeSlotVO=daySlotVO;
-  set setRefreshStatus(bool isRefresh)=>_isRefresh=isRefresh;
 
   PickTimeAndCinemaBloc(int movieID){
     _movieBookingModel.getDayTimeSlotsListFromDataBase(movieID, _movieBookingModel.getToken() ?? '', _date).listen((value) {
@@ -49,8 +46,8 @@ class PickTimeAndCinemaBloc extends ChangeNotifier{
       },
           onError: (error)=>print(error)
       );
-      getDayTimeSlotsVO.forEach((element1) {
-        element1.timeSlots.forEach((element2) {
+      getDayTimeSlotsVO?.forEach((element1) {
+        element1.timeSlots?.forEach((element2) {
           element2.isSelect = false;
         });
       });
@@ -58,23 +55,29 @@ class PickTimeAndCinemaBloc extends ChangeNotifier{
   }
 
   void selectTimeSlot(TimeSlotsVO timeSlotsVO) {
-    getDayTimeSlotsVO?.forEach((element1) {
-      element1.timeSlots?.forEach((element2) {
-        if (element2 == timeSlotsVO) {
-          element2.isSelect = true;
-        } else {
-          element2.isSelect = false;
-        }
-      });
-    });
-    setRefreshStatus=!getRefreshStatus;
+
+    List<DayTimeSlotVO>?newDayTimeSlots=getDayTimeSlotsVO?.map((daySlots){
+     List<TimeSlotsVO>?newTimeSlots=daySlots.timeSlots?.map((timeSlots) {
+       if (timeSlots == timeSlotsVO) {
+         timeSlots.isSelect = true;
+       } else {
+         timeSlots.isSelect = false;
+       }
+       return timeSlots;
+     }).toList();
+     DayTimeSlotVO newDaySlots=daySlots;
+     newDaySlots.timeSlots=newTimeSlots;
+     return newDaySlots;
+   }).toList();
+
+    setDayTimeSlotsVO=newDayTimeSlots;
     notifyListeners();
   }
 
   Future<DayTimeSlotVO?> checkIfDateIsSelectOrNot(){
     DayTimeSlotVO dayTimeSlotVO=DayTimeSlotVO.normal();
-    getDayTimeSlotsVO.forEach((element1) {
-      element1.timeSlots.forEach((element2) {
+    getDayTimeSlotsVO?.forEach((element1) {
+      element1.timeSlots?.forEach((element2) {
         if (element2.isSelect) {
          dayTimeSlotVO=element1;
           dayTimeSlotVO.subTimeSlots= element2;

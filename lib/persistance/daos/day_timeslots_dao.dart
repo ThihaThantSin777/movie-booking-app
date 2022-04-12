@@ -13,8 +13,6 @@ class DayTimeTimeSlotsDao{
 
   void saveDayTimeSlotsList(DayTimeSlotVO dayTimeSlotsList,String date){
     getDayTimeSlotsBox().put(date, dayTimeSlotsList);
-    print('Save daytime slots');
-    print('');
   }
 
   DayTimeSlotVO? getDayTimeSlotsByDate(String date)=>getDayTimeSlotsBox().get(date);
@@ -22,8 +20,6 @@ class DayTimeTimeSlotsDao{
   Box<DayTimeSlotVO> getDayTimeSlotsBox()=>Hive.box<DayTimeSlotVO>(BOX_NAME_DAY_TIMESLOTS_VO);
 
   Stream<void>getDayTimeSlotsStream(){
-    print('Watch Daytime Slots Stream');
-    print('');
     return getDayTimeSlotsBox().watch();
   }
 

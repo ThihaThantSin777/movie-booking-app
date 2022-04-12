@@ -13,9 +13,6 @@ class ActorDAO{
 
   void saveActors(int movieID,CastCrewVO actorList){
     getActorBox().put(movieID,actorList);
-
-    print('Saved actors');
-    print('');
   }
 
   CastCrewVO? getActorListByID(int movieID) {
@@ -25,8 +22,6 @@ class ActorDAO{
   Box<CastCrewVO>getActorBox()=>Hive.box<CastCrewVO>(BOX_NAME_ACTOR_VO);
 
   Stream<void>getActorStream(){
-    print('Watch Actor Stream');
-    print('');
     return getActorBox().watch();
   }
 

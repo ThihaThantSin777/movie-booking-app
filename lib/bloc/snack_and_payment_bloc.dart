@@ -9,19 +9,16 @@ class SnackAndPaymentBloc extends ChangeNotifier {
   List<SnackAndPaymentVO>? _snackList;
   List<SnackAndPaymentVO>? _paymentMethodsList;
   int _totalPrice = 0;
-  bool _isRefresh=false;
 
-  get getSnackList => _snackList;
-  get getPaymentMethodsList => _paymentMethodsList;
+  List<SnackAndPaymentVO>? get getSnackList => _snackList;
+  List<SnackAndPaymentVO>? get getPaymentMethodsList => _paymentMethodsList;
   get getTotalPrice => _totalPrice;
-  get isRefresh=>_isRefresh;
 
   set setSnackList(List<SnackAndPaymentVO>? snackList) =>
       _snackList = snackList;
   set setPaymentMethodsList(List<SnackAndPaymentVO>? paymentMethodsList) =>
       _paymentMethodsList = paymentMethodsList;
   set setTotalPrice(int totalPrice) => _totalPrice = totalPrice;
-  set setRefresh(bool isRefresh)=>_isRefresh=isRefresh;
 
   SnackAndPaymentBloc(int subPrice) {
     setTotalPrice=subPrice;
@@ -42,38 +39,42 @@ class SnackAndPaymentBloc extends ChangeNotifier {
   }
 
   void paymentSelect(SnackAndPaymentVO snackAndPaymentVO) {
-    getPaymentMethodsList.forEach((element) {
+    List<SnackAndPaymentVO>? newPayment=getPaymentMethodsList?.map((element) {
       if (element == snackAndPaymentVO) {
         element.isSelect = true;
       } else {
         element.isSelect = false;
       }
-    });
-    setRefresh=!isRefresh;
+      return element;
+    }).toList();
+    setPaymentMethodsList=newPayment;
     notifyListeners();
   }
 
   void increase(SnackAndPaymentVO snackVO) {
-    getSnackList.forEach((element) {
+    List<SnackAndPaymentVO>? newSnack=getSnackList?.map((element) {
       if (snackVO == element) {
         element.quantity++;
         setTotalPrice = getTotalPrice + element.price;
       }
-    });
-    setRefresh=!isRefresh;
+      return element;
+    }).toList();
+    setSnackList=newSnack;
     notifyListeners();
   }
 
   void decrese(SnackAndPaymentVO snackVO) {
-    getSnackList.forEach((element) {
+    List<SnackAndPaymentVO>? newSnack=getSnackList?.map((element) {
       if (snackVO == element) {
         if (element.quantity != 0) {
           element.quantity--;
           setTotalPrice = getTotalPrice - element.price;
         }
       }
-    });
-    setRefresh=!isRefresh;
+      return element;
+    }).toList();
+
+    setSnackList=newSnack;
     notifyListeners();
   }
 }

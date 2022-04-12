@@ -1,5 +1,9 @@
-import 'package:flutter/material.dart';
+
+
+import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:movie_booking_app/data/vos/cast_crew_vo/cast_crew_vo.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/time_slots_vo.dart';
 import 'package:movie_booking_app/data/vos/genre_vo/genre_vo.dart';
@@ -11,15 +15,15 @@ import 'package:movie_booking_app/data/vos/movie_vo/spoken_languages.dart';
 import 'package:movie_booking_app/data/vos/snack_and_payment_vo/snack_and_payment_vo.dart';
 import 'package:movie_booking_app/data/vos/user_vo/card_vo.dart';
 import 'package:movie_booking_app/data/vos/user_vo/user_vo.dart';
-import 'package:movie_booking_app/page/home_screen.dart';
+import 'package:movie_booking_app/main.dart';
 import 'package:movie_booking_app/page/start_screen.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
 import 'package:movie_booking_app/persistance/hive_constant.dart';
-import 'package:movie_booking_app/resources/colors.dart';
 
-import 'data/vos/cast_crew_vo/cast_crew_vo.dart';
 
-main() async {
+void main()async{
+
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
   await Hive.initFlutter();
 
   Hive.registerAdapter(UserVOAdapter());
@@ -43,21 +47,20 @@ main() async {
   await Hive.openBox<DayTimeSlotVO>(BOX_NAME_DAY_TIMESLOTS_VO);
   await Hive.openBox<CardVO>(BOX_NAME_CARD_VO);
 
-  runApp(MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  MyApp({Key? key}) : super(key: key);
-  UserDAO userDAO = UserDAO();
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        showPerformanceOverlay: true,
-        title: 'Movie Bokking App',
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-            backgroundColor: main_screen_color,
-            body:
-                userDAO.isUserVOEmpty() ? StartScreen() :  HomeScreen()));
+ testWidgets("Movie Booking App Testing",
+  (WidgetTester tester)async{
+
+    await tester.pumpWidget(MyApp());
+    await Future.delayed(const Duration(seconds: 2));
+
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+
+    expect(find.byType(StartScreen), findsOneWidget);
+
+
+
   }
+ );
+
 }

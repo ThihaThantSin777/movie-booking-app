@@ -506,7 +506,7 @@ class RatingLevel extends StatelessWidget {
         }
       },
       onRatingUpdate: (rating) {
-        print(rating);
+
       },
     );
   }

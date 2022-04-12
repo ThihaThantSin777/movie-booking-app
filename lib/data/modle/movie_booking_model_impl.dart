@@ -35,7 +35,7 @@ class MovieBookingModelImpl extends MovieBookingModel {
   MovieDAO movieDAO = MovieDAO();
   ActorDAO actorDAO = ActorDAO();
   SnackDAO snackDAO = SnackDAO();
-  PaymentDAO paymentDAO=PaymentDAO();
+  PaymentDAO paymentDAO = PaymentDAO();
   DayTimeTimeSlotsDao dayTimeTimeSlotsDao = DayTimeTimeSlotsDao();
   int index = 0;
 
@@ -123,7 +123,7 @@ class MovieBookingModelImpl extends MovieBookingModel {
     return movieBookingDataAgent
         .getComingSoonMovie(apiKey, language, page)
         .then((movieList) {
-      List<MovieVO> modifyMovieList = movieList?.map((movies) {
+      List<MovieVO> modifyMovieList = (movieList)?.map((movies) {
             movies.isComingSoon = true;
             index++;
             movies.order = index;
@@ -151,8 +151,8 @@ class MovieBookingModelImpl extends MovieBookingModel {
       movieBookingDataAgent
           .getMovieCastList(movieID, apiKey, language)
           .then((actors) {
-            CastCrewVO cast=CastCrewVO.normal();
-            cast.castList=actors;
+        CastCrewVO cast = CastCrewVO.normal();
+        cast.castList = actors;
         actorDAO.saveActors(movieID, cast);
         return Future.value(actors);
       });
@@ -173,8 +173,8 @@ class MovieBookingModelImpl extends MovieBookingModel {
       movieBookingDataAgent
           .getDayTimeSlotsList(movieID, date, authorization)
           .then((dayTimeSlotsList) {
-        DayTimeSlotVO dayTimeSlotVO=DayTimeSlotVO.normal();
-        dayTimeSlotVO.daytimeSlotVOList=dayTimeSlotsList;
+        DayTimeSlotVO dayTimeSlotVO = DayTimeSlotVO.normal();
+        dayTimeSlotVO.daytimeSlotVOList = dayTimeSlotsList;
         dayTimeTimeSlotsDao.saveDayTimeSlotsList(dayTimeSlotVO, date);
         return Future.value(dayTimeSlotsList);
       });
@@ -195,15 +195,18 @@ class MovieBookingModelImpl extends MovieBookingModel {
   @override
   Future<List<SnackAndPaymentVO>?> getPaymentMethodsList(
           String authorization) =>
-      movieBookingDataAgent.getPaymentMethodsList(authorization).then((paymentList) {
-        paymentDAO.savePayment(paymentList??[]);
+      movieBookingDataAgent
+          .getPaymentMethodsList(authorization)
+          .then((paymentList) {
+        paymentDAO.savePayment(paymentList ?? []);
         return Future.value(paymentList);
       });
 
   @override
   Future<UserVO?> getProfile(String authorization) =>
       movieBookingDataAgent.getProfile(authorization).then((userVO) {
-        UserVO user=userVO??UserVO.normal()..token=userDAO.getUserInfo()?.token;
+        UserVO user = userVO ?? UserVO.normal()
+          ..token = userDAO.getUserInfo()?.token;
         userDAO.saveUser(user);
         return Future.value(userVO);
       });
@@ -223,45 +226,78 @@ class MovieBookingModelImpl extends MovieBookingModel {
   String? getToken() => userDAO.getAuthorizationToken();
 
   @override
-  Stream<List<MovieVO>?> getNowPlayingMovieModleFromDataBase(String apiKey, String language, int page) {
+  Stream<List<MovieVO>?> getNowPlayingMovieModleFromDataBase(
+      String apiKey, String language, int page) {
     getNowPlayingMovieModle(apiKey, language, page);
-    return movieDAO.getMovieStream().startWith(movieDAO.getNowPlayingMoviesStream()).map((event) => movieDAO.getAllMovieList().where((element) => element.isNowShowing??false).toList());
+    return movieDAO
+        .getMovieStream()
+        .startWith(movieDAO.getNowPlayingMoviesStream())
+        .map((event) => movieDAO
+            .getAllMovieList()
+            .where((element) => element.isNowShowing ?? false)
+            .toList());
   }
 
   @override
-  Stream<List<MovieVO>?> getComingSoonMovieModleFromDataBase(String apiKey, String language, int page) {
-   getComingSoonMovieModle(apiKey, language, page);
-   return movieDAO.getMovieStream().startWith(movieDAO.getComingSoonMoviesStream()).map((event) => movieDAO.getAllMovieList().where((element) => element.isComingSoon??false).toList());
+  Stream<List<MovieVO>?> getComingSoonMovieModleFromDataBase(
+      String apiKey, String language, int page) {
+    getComingSoonMovieModle(apiKey, language, page);
+    return movieDAO
+        .getMovieStream()
+        .startWith(movieDAO.getComingSoonMoviesStream())
+        .map((event) => (movieDAO.getAllMovieList())
+            .where((element) => element.isComingSoon ?? false)
+            .toList());
   }
 
   @override
-  Stream<MovieVO?> getMovieDetailsFromDataBase(int movieID, String apiKey, String language) {
-  getMovieDeatilsModle(movieID, apiKey, language);
-  return movieDAO.getMovieStream().startWith(movieDAO.getMovieStreamByID(movieID)).map((event) => movieDAO.getMoviesByID(movieID));
+  Stream<MovieVO?> getMovieDetailsFromDataBase(
+      int movieID, String apiKey, String language) {
+    getMovieDeatilsModle(movieID, apiKey, language);
+    return movieDAO
+        .getMovieStream()
+        .startWith(movieDAO.getMovieStreamByID(movieID))
+        .map((event) => movieDAO.getMoviesByID(movieID));
   }
 
   @override
-  Stream<CastCrewVO?> getActorListFromDataBase(int movieID,String apiKey,String language) {
+  Stream<CastCrewVO?> getActorListFromDataBase(
+      int movieID, String apiKey, String language) {
     getMovieCastList(movieID, apiKey, language);
-    return actorDAO.getActorStream().startWith(actorDAO.getAllActorStream(movieID)).map((event) => actorDAO.getActorListByID(movieID));
+    return actorDAO
+        .getActorStream()
+        .startWith(actorDAO.getAllActorStream(movieID))
+        .map((event) => actorDAO.getActorListByID(movieID));
   }
 
   @override
-  Stream<List<SnackAndPaymentVO>?> getSnackListFromDataBase(String authorization) {
+  Stream<List<SnackAndPaymentVO>?> getSnackListFromDataBase(
+      String authorization) {
     getSnackList(authorization);
-    return snackDAO.getSnackStream().startWith(snackDAO.getSnackListStream()).map((event) => snackDAO.getSnackList());
+    return snackDAO
+        .getSnackStream()
+        .startWith(snackDAO.getSnackListStream())
+        .map((event) => snackDAO.getSnackList());
   }
 
   @override
-  Stream<List<SnackAndPaymentVO>?> getPaymentListFromDataBase(String authorization) {
+  Stream<List<SnackAndPaymentVO>?> getPaymentListFromDataBase(
+      String authorization) {
     getPaymentMethodsList(authorization);
-    return paymentDAO.getPaymentStream().startWith(paymentDAO.getPaymentListStream()).map((event) => paymentDAO.getPaymentList());
+    return paymentDAO
+        .getPaymentStream()
+        .startWith(paymentDAO.getPaymentListStream())
+        .map((event) => paymentDAO.getPaymentList());
   }
 
   @override
-  Stream<DayTimeSlotVO?> getDayTimeSlotsListFromDataBase( int movieID, String authorization,String date) {
+  Stream<DayTimeSlotVO?> getDayTimeSlotsListFromDataBase(
+      int movieID, String authorization, String date) {
     getDayTimeSlotsList(movieID, date, authorization);
-    return dayTimeTimeSlotsDao.getDayTimeSlotsStream().startWith(dayTimeTimeSlotsDao.getDayTimeSlotsByDateStream(date)).map((event) => dayTimeTimeSlotsDao.getDayTimeSlotsByDate(date));
+    return dayTimeTimeSlotsDao
+        .getDayTimeSlotsStream()
+        .startWith(dayTimeTimeSlotsDao.getDayTimeSlotsByDateStream(date))
+        .map((event) => dayTimeTimeSlotsDao.getDayTimeSlotsByDate(date));
   }
 
   @override
@@ -298,6 +334,9 @@ class MovieBookingModelImpl extends MovieBookingModel {
 
   @override
   Stream<UserVO?> getProfileFromDataBase() {
-   return userDAO.getUserStream().startWith(userDAO.getUserInfoStream()).map((event) => userDAO.getUserInfo());
+    return userDAO
+        .getUserStream()
+        .startWith(userDAO.getUserInfoStream())
+        .map((event) => userDAO.getUserInfo());
   }
 }

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:movie_booking_app/bloc/home_bloc.dart';
-import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
-import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
 import 'package:movie_booking_app/data/vos/user_vo/user_vo.dart';
 import 'package:movie_booking_app/network/api_constant/api_constant.dart';
 import 'package:movie_booking_app/page/details_screen.dart';
 import 'package:movie_booking_app/page/login_sigin_screen.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
 import 'package:movie_booking_app/resources/colors.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';

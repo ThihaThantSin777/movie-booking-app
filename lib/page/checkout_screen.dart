@@ -1,10 +1,12 @@
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:movie_booking_app/bloc/checkout_bloc.dart';
 import 'package:movie_booking_app/data/vos/check_out_vo/checkout_vo.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
 import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
 import 'package:movie_booking_app/page/home_screen.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
+import 'package:provider/provider.dart';
 
 import '../network/api_constant/api_constant.dart';
 import '../widgets/dotts_line_widget.dart';
@@ -15,54 +17,75 @@ class CheckoutScreen extends StatelessWidget {
   final MovieVO movieVO;
   final DayTimeSlotVO dayTimeSlotVO;
   final String formatDate;
+
   CheckoutScreen({
-   required this.checkoutVO,
+    required this.checkoutVO,
     required this.movieVO,
     required this.dayTimeSlotVO,
     required this.formatDate,
   });
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Container(
-        margin: const EdgeInsets.only(
-            top: medium_large_2x,
-            right: margin_small_2x,
-            left: margin_small_2x),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CloseIconView(() => _backToPayMentView(context)),
-            const TicketTitleView(),
-            const SizedBox(
-              height: spacing_micro_1x,
-            ),
-            TicketBodyView(
-              checkoutVO: checkoutVO ,
-              movieVO: movieVO,
-              dayTimeSlotVO: dayTimeSlotVO,
-              dateFormat: formatDate,
-            ),
-          ],
+    return ChangeNotifierProvider(
+      create: (_) =>
+          CheckOutBloc(checkoutVO, movieVO, dayTimeSlotVO, formatDate),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Container(
+          margin: const EdgeInsets.only(
+              top: medium_large_2x,
+              right: margin_small_2x,
+              left: margin_small_2x),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CloseIconView(() => _backToPayMentView(context)),
+              const TicketTitleView(),
+              const SizedBox(
+                height: spacing_micro_1x,
+              ),
+              Selector<CheckOutBloc, CheckoutVO>(
+                selector: (_, bloc) => bloc.getCheckoutVO,
+                builder: (_, checkoutVO, child) =>
+                    Selector<CheckOutBloc, MovieVO>(
+                  selector: (_, bloc) => bloc.getMovieVO,
+                  builder: (_, movieVO, child) =>
+                      Selector<CheckOutBloc, DayTimeSlotVO>(
+                    selector: (_, bloc) => bloc.getDayTimeSlotsVO,
+                    builder: (_, dayTimeSlotVO, child) =>
+                        Selector<CheckOutBloc, String>(
+                      selector: (_, bloc) => bloc.getFormatDate,
+                      builder: (_, formatDate, child) => TicketBodyView(
+                        checkoutVO: checkoutVO,
+                        movieVO: movieVO,
+                        dayTimeSlotVO: dayTimeSlotVO,
+                        dateFormat: formatDate,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
   void _backToPayMentView(context) {
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-      return  HomeScreen();
+      return HomeScreen();
     }));
   }
-
 }
-
 
 class TicketBodyView extends StatelessWidget {
   final CheckoutVO checkoutVO;
   final MovieVO movieVO;
   final DayTimeSlotVO dayTimeSlotVO;
   final String dateFormat;
+
   TicketBodyView(
       {required this.checkoutVO,
       required this.movieVO,
@@ -117,6 +140,7 @@ class TicketMovieDetailsSessionView extends StatelessWidget {
   final CheckoutVO checkoutVO;
   final DayTimeSlotVO dayTimeSlotVO;
   final String dateFormat;
+
   TicketMovieDetailsSessionView(
       {required this.checkoutVO,
       required this.dayTimeSlotVO,
@@ -128,7 +152,9 @@ class TicketMovieDetailsSessionView extends StatelessWidget {
       children: [
         TicketsDetailsSessionView(
             'Booking no', checkoutVO.bookingNo.toString()),
-        TicketsDetailsSessionView('Showtime - Date', dateFormat),
+        Wrap(
+          children: [TicketsDetailsSessionView('Showtime - Date', dateFormat)],
+        ),
         TicketsDetailsSessionView('Therater', dayTimeSlotVO.cinema.toString()),
         TicketsDetailsSessionView('Screen', "2"),
         TicketsDetailsSessionView('Row', checkoutVO.row.toString()),
@@ -144,6 +170,7 @@ class TicketsDetailsSessionView extends StatelessWidget {
   final String subType;
 
   TicketsDetailsSessionView(this.type, this.subType);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -170,6 +197,7 @@ class TicketsDetailsSessionView extends StatelessWidget {
 
 class TicketMovieTitleTimeSessionView extends StatelessWidget {
   final MovieVO movieVO;
+
   TicketMovieTitleTimeSessionView(this.movieVO);
 
   @override
@@ -202,6 +230,7 @@ class TicketImageSessionView extends StatelessWidget {
   final String imageUrl;
 
   TicketImageSessionView(this.imageUrl);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -243,7 +272,9 @@ class TicketTitleView extends StatelessWidget {
 
 class CloseIconView extends StatelessWidget {
   final Function onClick;
+
   CloseIconView(this.onClick);
+
   @override
   Widget build(BuildContext context) {
     return IconButton(
