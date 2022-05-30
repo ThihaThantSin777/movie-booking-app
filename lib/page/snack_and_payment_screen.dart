@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:movie_booking_app/bloc/snack_and_payment_bloc.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/snack_and_payment_vo/snack_and_payment_vo.dart';
 import 'package:movie_booking_app/page/payment_screen.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
+import 'package:movie_booking_app/persistance/daos/user_dao_impl.dart';
 import 'package:movie_booking_app/resources/colors.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';
@@ -41,28 +43,28 @@ class SnackAndPayMentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (_) => SnackAndPaymentBloc(subPrice),
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-              backgroundColor: Colors.white,
-              elevation: 0,
-              leading: const BackButtonView(
-                color: Colors.black,
-              )),
-          body:
-          // Selector<SnackAndPaymentBloc, bool>(
-          //   selector: (_, bloc) => bloc.isRefresh,
-          //   builder: (_, refresh, child) =>
 
-                Selector<SnackAndPaymentBloc,
-                    List<SnackAndPaymentVO>?>(
-                  shouldRebuild: (previous,next){
-                    // print('Previous $previous');
-                    // print('Next $next');
-                  return previous!=next;
-                  },
+    return ChangeNotifierProvider(
+      create: (_) => SnackAndPaymentBloc(subPrice),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: const BackButtonView(
+              color: Colors.black,
+            )),
+        body:
+            // Selector<SnackAndPaymentBloc, bool>(
+            //   selector: (_, bloc) => bloc.isRefresh,
+            //   builder: (_, refresh, child) =>
+
+            Selector<SnackAndPaymentBloc, List<SnackAndPaymentVO>?>(
+                shouldRebuild: (previous, next) {
+                  // print('Previous $previous');
+                  // print('Next $next');
+                  return previous != next;
+                },
                 selector: (_, bloc) => bloc.getSnackList,
                 builder: (_, snackList, child) {
                   SnackAndPaymentBloc snackPaymentBloc =
@@ -75,62 +77,55 @@ class SnackAndPayMentScreen extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(margin_small_2x),
                           child: SingleChildScrollView(
+                            key: const Key('Scroll Snack And Payment Key'),
                             child:
-                            // Selector<SnackAndPaymentBloc, bool>(
-                            //   selector: (_, bloc) => bloc.isRefresh,
-                            //   builder: (_, refresh, child) =>
-                            //
-                            //       Selector<
-                            //       SnackAndPaymentBloc,
-                            //       List<SnackAndPaymentVO>?>(
-                            //     selector: (_, bloc) => bloc.getSnackList,
-                            //     builder: (_, snackList, child) =>
-                                    Column(
-                                  children: [
-                                    snackList?.isEmpty ?? true
-                                        ? const Center(
-                                            child: CircularProgressIndicator(),
-                                          )
-                                        : ComboAndPaymentSessionView(
-                                            snackList: snackList ?? [],
-                                            increse: (obj) =>
-                                                snackPaymentBloc.increase(obj),
-                                            decrease: (obj) =>
-                                                snackPaymentBloc.decrese(obj),
-                                          ),
-                                    Selector<SnackAndPaymentBloc, int>(
-                                      selector: (_, bloc) => bloc.getTotalPrice,
-                                      builder: (_, totalPrice, child) =>
-                                          TextFieldPromoCodeSessionView(
-                                        subTotal: totalPrice,
+
+                                Column(
+                              children: [
+                                snackList?.isEmpty ?? true
+                                    ? const Center(
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : ComboAndPaymentSessionView(
+                                        snackList: snackList ?? [],
+                                        increse: (obj) =>
+                                            snackPaymentBloc.increase(obj),
+                                        decrease: (obj) =>
+                                            snackPaymentBloc.decrese(obj),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: margin_medium_3x,
-                                    ),
-                                    Selector<SnackAndPaymentBloc,
-                                        List<SnackAndPaymentVO>?>(
-                                      shouldRebuild: (previous,next)=>previous!=next,
-                                      selector: (_, bloc) =>
-                                          bloc.getPaymentMethodsList,
-                                      builder: (_, paymentList, child) =>
-                                          paymentList?.isEmpty ?? true
-                                              ? const Center(
-                                                  child:
-                                                      CircularProgressIndicator(),
-                                                )
-                                              : PaymentSessionView(
-                                                  paymentMethodsList:
-                                                      paymentList ?? [],
-                                                  onTap: (obj) =>
-                                                      snackPaymentBloc
-                                                          .paymentSelect(obj),
-                                                ),
-                                    )
-                                  ],
+                                Selector<SnackAndPaymentBloc, int>(
+                                  selector: (_, bloc) => bloc.getTotalPrice,
+                                  builder: (_, totalPrice, child) =>
+                                      TextFieldPromoCodeSessionView(
+                                    subTotal: totalPrice,
+                                  ),
                                 ),
+                                const SizedBox(
+                                  height: margin_medium_3x,
+                                ),
+                                Selector<SnackAndPaymentBloc,
+                                    List<SnackAndPaymentVO>?>(
+                                  shouldRebuild: (previous, next) =>
+                                      previous != next,
+                                  selector: (_, bloc) =>
+                                      bloc.getPaymentMethodsList,
+                                  builder: (_, paymentList, child) =>
+                                      paymentList?.isEmpty ?? true
+                                          ? const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            )
+                                          : PaymentSessionView(
+                                              paymentMethodsList:
+                                                  paymentList ?? [],
+                                              onTap: (obj) => snackPaymentBloc
+                                                  .paymentSelect(obj),
+                                            ),
+                                )
+                              ],
+                            ),
                             //  ),
-                           // ),
+                            // ),
                           ),
                         ),
                       ),
@@ -140,45 +135,43 @@ class SnackAndPayMentScreen extends StatelessWidget {
                           padding:
                               const EdgeInsets.only(bottom: medium_large_2x),
                           child: Selector<SnackAndPaymentBloc, int>(
-                  selector: (_, bloc) => bloc.getTotalPrice,
-                  builder: (_, totalPrice, child) =>
-
-                          ButtonWidget(
-                            onClick: () {
-                    _navigateToPaymentScreenView(context, totalPrice:totalPrice , snackList: snackList??[]);
-                  },
-
-                            child: Selector<SnackAndPaymentBloc, int>(
-                                selector: (_, bloc) => bloc.getTotalPrice,
-                                builder: (_, totalPrice, child) =>
-                                    ButtonTextView('Pay \$$totalPrice')),
+                            selector: (_, bloc) => bloc.getTotalPrice,
+                            builder: (_, totalPrice, child) => ButtonWidget(
+                              backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
+                              onClick: () {
+                                _navigateToPaymentScreenView(context,
+                                    totalPrice: totalPrice,
+                                    snackList: snackList ?? []);
+                              },
+                              child: Selector<SnackAndPaymentBloc, int>(
+                                  selector: (_, bloc) => bloc.getTotalPrice,
+                                  builder: (_, totalPrice, child) =>
+                                      ButtonTextView('Pay \$$totalPrice')),
+                            ),
                           ),
                         ),
-                      ),
                       )
                     ],
-
                   );
                 }),
-          ),
-       // )
+      ),
+      // )
     );
   }
 
-
-
-  void _navigateToPaymentScreenView(context,{required int totalPrice,required List<SnackAndPaymentVO> snackList}) {
+  void _navigateToPaymentScreenView(context,
+      {required int totalPrice, required List<SnackAndPaymentVO> snackList}) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
       return PaymentScreen(
         totalPrice: totalPrice,
         dayTimeSlotVO: dayTimeSlotVO,
         timeSlotsVO: timeSlotsVO,
-        bookingDate:bookingDate,
-        snackList: snackList ,
+        bookingDate: bookingDate,
+        snackList: snackList,
         movieVO: movieVO,
         row: row,
         seats: seat,
-        formatDate:formatDate,
+        formatDate: formatDate,
       );
     }));
   }
@@ -197,10 +190,13 @@ class ComboAndPaymentSessionView extends StatelessWidget {
     return ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemBuilder: (context, index) => ComboSetSessionView(
-            snack: snackList[index],
-            increse: (obj) => increse(obj),
-            decrease: (obj) => decrease(obj)),
+        itemBuilder: (context, index) {
+          return ComboSetSessionView(
+              id: snackList[index].id.toString(),
+              snack: snackList[index],
+              increse: (obj) => increse(obj),
+              decrease: (obj) => decrease(obj));
+        },
         separatorBuilder: (context, index) =>
             const SizedBox(height: margin_medium),
         itemCount: snackList.length);
@@ -215,6 +211,7 @@ class PaymentSessionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,6 +221,7 @@ class PaymentSessionView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: paymentMethodsList
                 .map((payment) => PayMentMethodView(
+                      key: Key(payment.name.toString()),
                       snackAndPaymentVO: payment,
                       payMentIcon: const Icon(Icons.credit_card),
                       onTap: (obj) => onTap(obj),
@@ -241,9 +239,11 @@ class PayMentMethodView extends StatelessWidget {
   final Function(SnackAndPaymentVO) onTap;
 
   PayMentMethodView(
-      {required this.snackAndPaymentVO,
+      {Key? key,
+      required this.snackAndPaymentVO,
       required this.payMentIcon,
-      required this.onTap});
+      required this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -358,9 +358,15 @@ class ComboSetSessionView extends StatelessWidget {
   final SnackAndPaymentVO snack;
   final Function(SnackAndPaymentVO) increse;
   final Function(SnackAndPaymentVO) decrease;
+  final String id;
 
   ComboSetSessionView(
-      {required this.snack, required this.increse, required this.decrease});
+      {Key? key,
+      required this.snack,
+      required this.increse,
+      required this.decrease,
+      required this.id})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -374,9 +380,11 @@ class ComboSetSessionView extends StatelessWidget {
           height: spacing_micro_1x,
         ),
         ComboSetSubTitleAndQuantityView(
+          key: key,
           snack: snack,
           increse: (obj) => increse(obj),
           decrease: (obj) => decrease(obj),
+          id: id,
         )
       ],
     );
@@ -387,9 +395,14 @@ class ComboSetSubTitleAndQuantityView extends StatelessWidget {
   final SnackAndPaymentVO snack;
   final Function(SnackAndPaymentVO) increse;
   final Function(SnackAndPaymentVO) decrease;
+  final String id;
 
   ComboSetSubTitleAndQuantityView(
-      {required this.snack, required this.increse, required this.decrease});
+      {Key? key,
+      required this.snack,
+      required this.increse,
+      required this.decrease,
+      required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -398,9 +411,11 @@ class ComboSetSubTitleAndQuantityView extends StatelessWidget {
         ComboSubTitleView(snack.description.toString()),
         const Spacer(),
         QunatityBoxView(
+          key: key,
           snack: snack,
           increse: (obj) => increse(obj),
           decrease: (obj) => decrease(obj),
+          id: id,
         )
       ],
     );
@@ -411,9 +426,15 @@ class QunatityBoxView extends StatelessWidget {
   final SnackAndPaymentVO snack;
   final Function(SnackAndPaymentVO) increse;
   final Function(SnackAndPaymentVO) decrease;
+  final String id;
 
   QunatityBoxView(
-      {required this.snack, required this.increse, required this.decrease});
+      {Key? key,
+      required this.snack,
+      required this.increse,
+      required this.decrease,
+      required this.id})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -428,6 +449,7 @@ class QunatityBoxView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             GestureDetector(
+              key: Key(id+'2'),
               onTap: () => decrease(snack),
               child: const Text(
                 '-',
@@ -443,6 +465,7 @@ class QunatityBoxView extends StatelessWidget {
             ),
             Container(width: 1, color: Colors.black26),
             GestureDetector(
+              key: Key(id + "1"),
               onTap: () => increse(snack),
               child: const Text(
                 '+',

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:movie_booking_app/data/vos/user_vo/select_card_vo.dart';
 
 import '../data/modle/movie_booking_model.dart';
 import '../data/modle/movie_booking_model_impl.dart';
@@ -8,9 +9,14 @@ import '../data/vos/user_vo/card_vo.dart';
 import '../network/response/check_out_response/check_out_raw_response.dart';
 class PaymentBloc extends ChangeNotifier {
   List<CardVO>? _cardVO;
-  final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
+   MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
   CardVO ?_card;
   bool _isLoading = false;
+  List<SelectCardVO> ?_selectCardVO;
+
+  List<SelectCardVO> ? get getSelectCardVO=>_selectCardVO;
+
+  set setSelectCardVO(List<SelectCardVO>? selectCardVO)=>_selectCardVO=selectCardVO;
 
   get getCardVO => _cardVO;
 
@@ -27,10 +33,19 @@ class PaymentBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  PaymentBloc() {
+  PaymentBloc([MovieBookingModel?movieBookingModel]) {
+    if(movieBookingModel!=null){
+      _movieBookingModel=movieBookingModel;
+    }
     _movieBookingModel.getProfileFromDataBase().listen((user) {
-      setCardVO = user?.cards;
+      setCardVO = user?.cards?.reversed.toList();
       setCard = getCardVO[0] ?? CardVO.normal();
+      List<SelectCardVO>_temp=[];
+      user?.cards?.reversed.toList().forEach((element) {
+        SelectCardVO selectVO=SelectCardVO(false, element);
+        _temp.add(selectVO);
+      });
+      setSelectCardVO=_temp;
       notifyListeners();
     },
         onError: (error) => print(error)
@@ -40,6 +55,16 @@ class PaymentBloc extends ChangeNotifier {
 
   void saveCard(CardVO cardVO) {
     setCard = cardVO;
+
+   List<SelectCardVO>?selectList= getSelectCardVO?.map((element) {
+      if(element.cardVO==cardVO){
+        element.isSelect=true;
+      }else{
+        element.isSelect=false;
+      }
+      return element;
+    }).toList();
+   setSelectCardVO=selectList;
     notifyListeners();
   }
 

@@ -5,7 +5,7 @@ import '../data/modle/movie_booking_model_impl.dart';
 import '../data/vos/snack_and_payment_vo/snack_and_payment_vo.dart';
 
 class SnackAndPaymentBloc extends ChangeNotifier {
-  final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
+   MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
   List<SnackAndPaymentVO>? _snackList;
   List<SnackAndPaymentVO>? _paymentMethodsList;
   int _totalPrice = 0;
@@ -20,7 +20,10 @@ class SnackAndPaymentBloc extends ChangeNotifier {
       _paymentMethodsList = paymentMethodsList;
   set setTotalPrice(int totalPrice) => _totalPrice = totalPrice;
 
-  SnackAndPaymentBloc(int subPrice) {
+  SnackAndPaymentBloc(int subPrice,[MovieBookingModel? movieBookingModel]) {
+    if(movieBookingModel!=null){
+      _movieBookingModel=movieBookingModel;
+    }
     setTotalPrice=subPrice;
     _movieBookingModel
         .getSnackListFromDataBase(_movieBookingModel.getToken() ?? '')

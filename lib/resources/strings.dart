@@ -2,6 +2,8 @@ const main_screen_welcome_title = 'Welcome!';
 
 const main_screen_welcome_sub_title = "Hello! Welcome to Galaxy App.";
 
+const main_screen_movie_welcome_sub_title = "Hello! Welcome to Movie App.";
+
 const button_get_start = 'Get Started';
 
 const login_scrren_sub_title = "welcome back, login to continue";

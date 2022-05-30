@@ -6,7 +6,7 @@ import '../data/modle/movie_booking_model.dart';
 import '../data/modle/movie_booking_model_impl.dart';
 
 class AddNewCardBloc extends ChangeNotifier{
-  final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
+   final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
 
   Future<CreateCardResponse?>createCard({required String cardNumber,required String cardHolder,required String expirationDate,required String cvc}) {
   String authorization=_movieBookingModel.getToken()??'';

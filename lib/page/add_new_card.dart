@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movie_booking_app/bloc/add_new_card_bloc.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
@@ -62,6 +64,7 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
                 Builder(
                   builder: (context) {
                     return ButtonWidget(
+                      backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
                         onClick: () {
                           AddNewCardBloc addNewCardBloc=Provider.of(context,listen: false);
                           _navigateToOriginalScreen(context,addNewCardBloc);
@@ -83,6 +86,7 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
+            key: const Key('Alert Add New Card Status Text'),
             title: Text(message),
             content: Text(subMessage),
             actions: [
@@ -157,6 +161,7 @@ class CVCView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormFieldWidget(
+      key: const Key('CVC Key'),
       title: 'CVC',
       example: 'Example 123',
       controller: controller,
@@ -178,7 +183,8 @@ class ExprationDateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormFieldWidget(
-      title: 'Expration Date',
+      key: const Key('Expiration Date Key'),
+      title: 'Expiration Date',
       example: '08/22',
       controller: controller,
       validation: (str) {
@@ -199,6 +205,7 @@ class CardHolderView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormFieldWidget(
+      key: const Key('Card Holder Key'),
       title: 'Card Holder',
       example: 'Your name',
       controller: controller,
@@ -220,6 +227,7 @@ class CardNumberView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormFieldWidget(
+      key: const Key('Card Number Key'),
       title: 'Card Number',
       example: '1234 5678 9012 3456',
       controller: controller,

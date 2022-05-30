@@ -1,5 +1,6 @@
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:movie_booking_app/bloc/checkout_bloc.dart';
 import 'package:movie_booking_app/data/vos/check_out_vo/checkout_vo.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
@@ -27,9 +28,11 @@ class CheckoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateTime dateTime=DateTime.parse(formatDate);
+    String changeDate=DateFormat.yMd().format(dateTime).toString();
     return ChangeNotifierProvider(
       create: (_) =>
-          CheckOutBloc(checkoutVO, movieVO, dayTimeSlotVO, formatDate),
+          CheckOutBloc(checkoutVO, movieVO, dayTimeSlotVO, changeDate),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Container(
@@ -159,7 +162,7 @@ class TicketMovieDetailsSessionView extends StatelessWidget {
         TicketsDetailsSessionView('Screen', "2"),
         TicketsDetailsSessionView('Row', checkoutVO.row.toString()),
         TicketsDetailsSessionView('Seats', checkoutVO.seat.toString()),
-        TicketsDetailsSessionView('Price', "\$${checkoutVO.total.toString()}"),
+        TicketsDetailsSessionView('Price', "${checkoutVO.total.toString()}"),
       ],
     );
   }

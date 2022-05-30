@@ -168,9 +168,10 @@ class MovieVO {
     return genres?.map((genre) => genre.name ?? "").toList() ?? [];
   }
 
+
   @override
   String toString() {
-    return 'MovieVO{adult: $adult, backdropPath: $backdropPath, belongsToCollection: $belongsToCollection, budget: $budget, genres: $genres, homePage: $homePage, genreIDs: $genreIDs, id: $id, imdbID: $imdbID, originalLanguage: $originalLanguage, originalTitle: $originalTitle, overview: $overview, popularity: $popularity, posterPath: $posterPath, productionCompanies: $productionCompanies, productionCountries: $productionCountries, releaseDate: $releaseDate, revenue: $revenue, runtime: $runtime, spokenLanguages: $spokenLanguages, status: $status, tagLine: $tagLine, title: $title, video: $video, voteAverage: $voteAverage, voteCount: $voteCount, order: $order}';
+    return 'MovieVO{adult: $adult, backdropPath: $backdropPath, belongsToCollection: $belongsToCollection, budget: $budget, genres: $genres, homePage: $homePage, genreIDs: $genreIDs, id: $id, imdbID: $imdbID, originalLanguage: $originalLanguage, originalTitle: $originalTitle, overview: $overview, popularity: $popularity, posterPath: $posterPath, productionCompanies: $productionCompanies, productionCountries: $productionCountries, releaseDate: $releaseDate, revenue: $revenue, runtime: $runtime, spokenLanguages: $spokenLanguages, status: $status, tagLine: $tagLine, title: $title, video: $video, voteAverage: $voteAverage, voteCount: $voteCount, order: $order, isNowShowing: $isNowShowing, isComingSoon: $isComingSoon}';
   }
 
   @override
@@ -240,3 +241,5 @@ class MovieVO {
       isNowShowing.hashCode ^
       isComingSoon.hashCode;
 }
+
+

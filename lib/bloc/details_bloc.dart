@@ -8,7 +8,7 @@ import '../network/api_constant/api_constant.dart';
 
 class DetailsBloc extends ChangeNotifier {
   MovieVO? _movieVO;
-  final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
+   MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
   List<CastCrewVO>? _castCrewVO;
 
   get getMovieVO => _movieVO;
@@ -19,7 +19,10 @@ class DetailsBloc extends ChangeNotifier {
 
   set setCastCrewVO(List<CastCrewVO>? castCrewVO) => _castCrewVO = castCrewVO;
 
-  DetailsBloc(int movieID) {
+  DetailsBloc(int movieID,[MovieBookingModel? movieBookingModel]) {
+    if(movieBookingModel!=null){
+      _movieBookingModel=movieBookingModel;
+    }
     _movieBookingModel
         .getMovieDetailsFromDataBase(movieID, API_KEY, LANGUAGE)
         .listen((movie) {
@@ -30,7 +33,6 @@ class DetailsBloc extends ChangeNotifier {
     _movieBookingModel
         .getActorListFromDataBase(movieID, API_KEY, LANGUAGE)
         .listen((cast) {
-          print(cast);
           if(cast?.castList?.isNotEmpty??false){
             setCastCrewVO=cast?.castList as List<CastCrewVO>;
             notifyListeners();

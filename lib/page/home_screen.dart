@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movie_booking_app/bloc/home_bloc.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
 import 'package:movie_booking_app/data/vos/user_vo/user_vo.dart';
 import 'package:movie_booking_app/network/api_constant/api_constant.dart';
@@ -10,16 +12,23 @@ import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';
 import 'package:provider/provider.dart';
 
-
-
 class HomeScreen extends StatelessWidget {
   final List<String> menuItems = [
     'Promotion code',
     'Select a language',
-    'Terms of service',
+    'Terms of abstraction_layer',
     'Help',
     'Rate us'
   ];
+  final List<Tab> tabsItems = [
+    const Tab(
+      text: now_showing,
+    ),
+    const Tab(
+      text: coming_soon,
+    ),
+  ];
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   _showResult(message, subMessage, context) {
     _showALertBox(context, message, subMessage);
@@ -54,38 +63,42 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool? cond = IS_GLAXY_MOVIE_DESIGN_VIEW[
+        EnvironmentConfig.CONFIG_IS_GALAXY_APP_DESIGN];
     return ChangeNotifierProvider(
       create: (_) => HomeBloc(),
       child: Selector<HomeBloc, UserVO?>(
         selector: (_, bloc) => bloc.getUser,
         builder: (_, user, child) => Scaffold(
-          drawer: Stack(
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: Drawer(
-                  child: DrawerSessionView(
-                    menuItems: menuItems,
-                    userVO: user ?? UserVO.normal(),
-                    onTap: () {
-                      HomeBloc homeBloc = Provider.of(_, listen: false);
-                      homeBloc.logout().then((value) {
-                        homeBloc.deleteUserData();
-                        _showResult('Success', value?.message, context);
-                      }).catchError((error) {
-                        _showResult('Error', 'Logout Fail', context);
-                      });
-                    },
-                  ),
-                ),
-              ),
-            ],
+          key: _scaffoldKey,
+          drawer: Drawer(
+            child: DrawerSessionView(
+              onTapBack: () {
+                Navigator.of(context).pop();
+              },
+              menuItems: menuItems,
+              userVO: user ?? UserVO.normal(),
+              onTap: () {
+                HomeBloc homeBloc = Provider.of(_, listen: false);
+                homeBloc.logout().then((value) {
+                  homeBloc.deleteUserData();
+                  _showResult('Success', value?.message, context);
+                }).catchError((error) {
+                  _showResult('Error', 'Logout Fail', context);
+                });
+              },
+            ),
           ),
           backgroundColor: white_color,
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Colors.white,
-            leading: Image.asset('images/menu.png'),
+            leading: GestureDetector(
+                key: const Key('Open Drawer Key'),
+                onTap: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+                child: Image.asset('images/menu.png')),
             actions: const [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: margin_small_2x),
@@ -108,32 +121,93 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(
                 height: margin_medium,
               ),
-              Selector<HomeBloc, List<MovieVO>?>(
-                selector: (_, bloc) => bloc.getNowPlayingVO,
-                builder: (_, getNowPlayingVO, child) => getNowPlayingVO == null
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : MovieBodyView(
-                        movieList: getNowPlayingVO,
-                        onClick: (id) =>
-                            _navigateToMovieDetailsScreen(context, id ?? 0),
-                        title: now_showing,
-                      ),
-              ),
-              Selector<HomeBloc, List<MovieVO>?>(
-                selector: (_, bloc) => bloc.getComingSoonVO,
-                builder: (_, getComingSoonVO, child) => getComingSoonVO == null
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : MovieBodyView(
-                        movieList: getComingSoonVO,
-                        onClick: (id) =>
-                            _navigateToMovieDetailsScreen(context, id ?? 0),
-                        title: coming_soon,
-                      ),
-              ),
+              cond ?? false
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Selector<HomeBloc, List<MovieVO>?>(
+                          selector: (_, bloc) => bloc.getNowPlayingVO,
+                          builder: (_, getNowPlayingVO, child) =>
+                              getNowPlayingVO == null
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : MovieBodyView(
+                                      movieList: getNowPlayingVO,
+                                      onClick: (id) =>
+                                          _navigateToMovieDetailsScreen(
+                                              context, id ?? 0),
+                                      title: now_showing,
+                                    ),
+                        ),
+                        Selector<HomeBloc, List<MovieVO>?>(
+                          selector: (_, bloc) => bloc.getComingSoonVO,
+                          builder: (_, getComingSoonVO, child) =>
+                              getComingSoonVO == null
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : MovieBodyView(
+                                      movieList: getComingSoonVO,
+                                      onClick: (id) =>
+                                          _navigateToMovieDetailsScreen(
+                                              context, id ?? 0),
+                                      title: coming_soon,
+                                    ),
+                        ),
+                      ],
+                    )
+                  : DefaultTabController(
+                      length: tabsItems.length,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TabBar(
+                            tabs: tabsItems,
+                            unselectedLabelColor: Colors.grey,
+                            labelColor: Colors.black,
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.9,
+                            child: TabBarView(
+                              children: [
+                                Selector<HomeBloc, List<MovieVO>?>(
+                                  selector: (_, bloc) => bloc.getNowPlayingVO,
+                                  builder: (_, getNowPlayingVO, child) =>
+                                      getNowPlayingVO == null
+                                          ? const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            )
+                                          : MovieBodyView(
+                                              movieList: getNowPlayingVO,
+                                              onClick: (id) =>
+                                                  _navigateToMovieDetailsScreen(
+                                                      context, id ?? 0),
+                                              title: now_showing,
+                                            ),
+                                ),
+                                Selector<HomeBloc, List<MovieVO>?>(
+                                  selector: (_, bloc) => bloc.getComingSoonVO,
+                                  builder: (_, getComingSoonVO, child) =>
+                                      getComingSoonVO == null
+                                          ? const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            )
+                                          : MovieBodyView(
+                                              movieList: getComingSoonVO,
+                                              onClick: (id) =>
+                                                  _navigateToMovieDetailsScreen(
+                                                      context, id ?? 0),
+                                              title: coming_soon,
+                                            ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ))
             ],
           ),
         ),
@@ -225,10 +299,12 @@ class MovieBodyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool? cond = IS_GLAXY_MOVIE_DESIGN_VIEW[
+        EnvironmentConfig.CONFIG_IS_GALAXY_APP_DESIGN];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        MovieBodyTitleView(title),
+        Visibility(visible: (cond ?? false), child: MovieBodyTitleView(title)),
         const SizedBox(
           height: margin_medium,
         ),
@@ -265,35 +341,37 @@ class NowShowingAndCommingSoonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: MediaQuery.of(context).size.height / 2.9,
-      child: MovieDetailsView(
-        movieVO: movieVO,
-        onClick: (id) => onClick(id),
-      ),
-    );
-  }
-}
+    bool? cond = IS_GLAXY_MOVIE_DESIGN_VIEW[
+        EnvironmentConfig.CONFIG_IS_GALAXY_APP_DESIGN];
+    return (cond ?? false)
+        ? SizedBox(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height / 2.9,
+            child: ListView.builder(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: margin_small_2x),
+                scrollDirection: Axis.horizontal,
+                itemCount: movieVO.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                      onTap: () => onClick(movieVO[index].id),
+                      child: MoviesView(movieVO[index]));
+                }))
+        : SizedBox(
+      height: MediaQuery.of(context).size.height *0.9,
+          child: GridView.builder(
 
-class MovieDetailsView extends StatelessWidget {
-  final List<MovieVO> movieVO;
-  final Function(int?) onClick;
-
-  MovieDetailsView({required this.movieVO, required this.onClick});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: margin_small_2x),
-        scrollDirection: Axis.horizontal,
-        itemCount: movieVO.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-              onTap: () => onClick(movieVO[index].id),
-              child: MoviesView(movieVO[index]));
-        });
-    ;
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 3/4.5
+              ),
+              itemCount: movieVO.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                    onTap: () => onClick(movieVO[index].id),
+                    child: MoviesView(movieVO[index]));
+              }),
+        );
   }
 }
 
@@ -398,11 +476,13 @@ class DrawerSessionView extends StatelessWidget {
     required this.menuItems,
     required this.userVO,
     required this.onTap,
+    required this.onTapBack,
   }) : super(key: key);
 
   final List<String> menuItems;
   final UserVO userVO;
   final Function onTap;
+  final Function onTapBack;
 
   @override
   Widget build(BuildContext context) {
@@ -416,7 +496,10 @@ class DrawerSessionView extends StatelessWidget {
             userVO: userVO,
           ),
           const SizedBox(height: margin_medium_3x),
-          DrawerMenuListView(menuItems: menuItems),
+          DrawerMenuListView(
+            menuItems: menuItems,
+            onTap: () => onTapBack(),
+          ),
           const Spacer(),
           LogOutView(
             onTap: () => onTap(),
@@ -455,9 +538,11 @@ class DrawerMenuListView extends StatelessWidget {
   const DrawerMenuListView({
     Key? key,
     required this.menuItems,
+    required this.onTap,
   }) : super(key: key);
 
   final List<String> menuItems;
+  final Function onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -466,6 +551,7 @@ class DrawerMenuListView extends StatelessWidget {
             .map((menuText) => Container(
                   margin: const EdgeInsets.only(top: margin_small_3x),
                   child: ListTile(
+                    onTap: () => onTap(),
                     leading: const Icon(
                       Icons.help,
                       color: Colors.white,

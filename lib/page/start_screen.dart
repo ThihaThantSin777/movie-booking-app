@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/page/login_sigin_screen.dart';
 import 'package:movie_booking_app/widgets/button_text_widget.dart';
 import 'package:movie_booking_app/widgets/button_widget.dart';
@@ -41,6 +43,7 @@ class StartgetStartButtonView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ButtonWidget(
+      backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
       onClick: () => onClick(),
       child: ButtonTextView(button_get_start),
       isGhostButton: true,
@@ -55,9 +58,10 @@ class StartTilteAnsSubTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool? cond=IS_GLAXY_MOVIE_APP[EnvironmentConfig.CONFIG_IS_GALAXY_APP];
     return Column(
-      children: const [
-        Text(
+      children:  [
+        const Text(
           main_screen_welcome_title,
           style: TextStyle(
               color: Colors.white,
@@ -65,8 +69,8 @@ class StartTilteAnsSubTitleView extends StatelessWidget {
               fontSize: regular_text_2x),
         ),
         Text(
-          main_screen_welcome_sub_title,
-          style: TextStyle(
+          cond??false?main_screen_welcome_sub_title:main_screen_movie_welcome_sub_title,
+          style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w300,
               fontSize: text_medium_1x),
@@ -83,6 +87,6 @@ class StartScreenImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset('images/logo.PNG');
+    return Image.asset('images/logo.png');
   }
 }

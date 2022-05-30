@@ -12,14 +12,20 @@ import 'package:movie_booking_app/network/data_agent/movie_booking_data_agent_im
 import 'package:movie_booking_app/network/response/check_out_response/check_out_raw_response.dart';
 import 'package:movie_booking_app/network/response/create_card_response/create_card_response.dart';
 import 'package:movie_booking_app/network/response/logout_response/logout_response.dart';
-import 'package:movie_booking_app/network/response/user_response/user_response.dart';
-import 'package:movie_booking_app/persistance/daos/actor_dao.dart';
-import 'package:movie_booking_app/persistance/daos/day_timeslots_dao.dart';
-import 'package:movie_booking_app/persistance/daos/movie_dao.dart';
-import 'package:movie_booking_app/persistance/daos/payment_dao.dart';
-import 'package:movie_booking_app/persistance/daos/snack_dao.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
+import 'package:movie_booking_app/persistance/daos/actor_dao_impl.dart';
+import 'package:movie_booking_app/persistance/daos/day_timeslots_dao_impl.dart';
+import 'package:movie_booking_app/persistance/daos/movie_dao_impl.dart';
+import 'package:movie_booking_app/persistance/daos/payment_dao_impl.dart';
+import 'package:movie_booking_app/persistance/daos/snack_dao_impl.dart';
+import 'package:movie_booking_app/persistance/daos/user_dao_impl.dart';
 import 'package:stream_transform/stream_transform.dart';
+
+import '../../persistance/abstraction_layer/actor_dao.dart';
+import '../../persistance/abstraction_layer/day_timeslots_dao.dart';
+import '../../persistance/abstraction_layer/movie_dao.dart';
+import '../../persistance/abstraction_layer/payment_dao.dart';
+import '../../persistance/abstraction_layer/snack_dao.dart';
+import '../../persistance/abstraction_layer/user_dao.dart';
 
 class MovieBookingModelImpl extends MovieBookingModel {
   MovieBookingDataAgent movieBookingDataAgent = MovieBookingDataAgentImpl();
@@ -31,13 +37,32 @@ class MovieBookingModelImpl extends MovieBookingModel {
 
   factory MovieBookingModelImpl() => _singleton;
 
-  UserDAO userDAO = UserDAO();
-  MovieDAO movieDAO = MovieDAO();
-  ActorDAO actorDAO = ActorDAO();
-  SnackDAO snackDAO = SnackDAO();
-  PaymentDAO paymentDAO = PaymentDAO();
-  DayTimeTimeSlotsDao dayTimeTimeSlotsDao = DayTimeTimeSlotsDao();
+  UserDAO userDAO = UserDAOImpl();
+  MovieDAO movieDAO = MovieDAOImpl();
+  ActorDAO actorDAO = ActorDAOImpl();
+  SnackDAO snackDAO = SnackDAOImpl();
+  PaymentDAO paymentDAO = PaymentDAOImpl();
+  DayTimeSlotsDAO dayTimeTimeSlotsDao = DayTimeTimeSlotsDaoImpl();
   int index = 0;
+
+  void setDaoAndDataAgent(
+      ActorDAO actorDao,
+      UserDAO userDao,
+      DayTimeSlotsDAO cinemaDao,
+      MovieDAO movieDao,
+      PaymentDAO paymentDao,
+      SnackDAO snackDao,
+      MovieBookingDataAgent dAgent,
+      ){
+    actorDAO = actorDao;
+    userDAO = userDao;
+    dayTimeTimeSlotsDao = cinemaDao;
+    movieDAO = movieDao;
+    paymentDAO = paymentDao;
+    snackDAO = snackDao;
+    movieBookingDataAgent = dAgent;
+  }
+
 
   @override
   Future<UserVO?> getUserLoginStatus(String email, String password) =>
@@ -81,7 +106,9 @@ class MovieBookingModelImpl extends MovieBookingModel {
       });
 
   @override
-  Stream<UserVO?> getUserInfo() => userDAO.getUserInfoStream();
+  Stream<UserVO?> getUserInfo() {
+    return userDAO.getUserInfoStream();
+  }
 
   @override
   void saveUserInfo(UserVO userVO) => userDAO.saveUser(userVO);
@@ -229,6 +256,7 @@ class MovieBookingModelImpl extends MovieBookingModel {
   Stream<List<MovieVO>?> getNowPlayingMovieModleFromDataBase(
       String apiKey, String language, int page) {
     getNowPlayingMovieModle(apiKey, language, page);
+
     return movieDAO
         .getMovieStream()
         .startWith(movieDAO.getNowPlayingMoviesStream())

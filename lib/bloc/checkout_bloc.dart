@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/foundation.dart';
+import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 
 import '../data/vos/check_out_vo/checkout_vo.dart';
 import '../data/vos/day_timeslot_vo/day_timeslot_vo.dart';
@@ -23,6 +24,7 @@ class CheckOutBloc extends ChangeNotifier{
    get getFormatDate=>_formatDate;
 
    CheckOutBloc(CheckoutVO checkoutVO,MovieVO movieVO,DayTimeSlotVO dayTimeSlotVO,String formatDate){
+
      setCheckoutVO=checkoutVO;
      setMovieVO=movieVO;
      setDayTimeSlotsVO=dayTimeSlotVO;

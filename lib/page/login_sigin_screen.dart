@@ -4,8 +4,6 @@ import 'package:movie_booking_app/bloc/login_sigin_bloc.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/user_vo/user_vo.dart';
-import 'package:movie_booking_app/network/authentication/facebook_sigin.dart';
-import 'package:movie_booking_app/network/authentication/google_sigin.dart';
 import 'package:movie_booking_app/page/home_screen.dart';
 import 'package:movie_booking_app/resources/colors.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
@@ -62,7 +60,10 @@ class _LoginSiginScreenState extends State<LoginSiginScreen> {
                     Navigator.of(context)
                         .pop(message == 'Error' ? false : true);
                   },
-                  child: const Text('OK'))
+                  child: const Text(
+                      'OK',
+                    key: Key('Alert Login Status Text'),
+                  ))
             ],
           );
         });
@@ -304,6 +305,7 @@ class LoginSiginTabBarSession extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
       child: LoginSiginListView(
+        key: key,
         tabs: tabs,
         loginForm: loginForm,
         siginForm: siginForm,
@@ -393,6 +395,7 @@ class LoginSiginListView extends StatelessWidget {
         Visibility(
             visible: isShowLogin,
             child: LoginView(
+              key: key,
               form: loginForm,
               onClick: () => loginClick(),
               loginEmailCOntroller: loginEmailCOntroller,
@@ -445,6 +448,7 @@ class LoginView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormFieldWidget(
+              key: const Key('Username Key'),
               title: email_title,
               example: example_email,
               controller: loginEmailCOntroller,
@@ -459,6 +463,7 @@ class LoginView extends StatelessWidget {
               height: margin_medium_1x,
             ),
             TextFormFieldWidget(
+              key: const Key('Password Key'),
               title: password_title,
               example: example_password,
               isObscureText: true,
@@ -538,6 +543,7 @@ class SiginView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormFieldWidget(
+              key: key,
               title: name_title,
               example: name_example,
               controller: siginNameCOntroller,

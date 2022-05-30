@@ -8,7 +8,7 @@ import '../data/modle/movie_booking_model_impl.dart';
 import '../data/vos/seating_plan_vo/seating_type_vo.dart';
 
 class SeatChooseBloc extends ChangeNotifier{
-  final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
+   MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
   List<SeatinTypeVO>? _seatTypeVO;
   int _seatCount = 0;
   String _selectSeatName = "";
@@ -31,7 +31,10 @@ class SeatChooseBloc extends ChangeNotifier{
   set setSelectSeats(List<String> selectSeats)=>_selectSeats=selectSeats;
   set setDateTemp(String dateTemp)=>_dateTemp=dateTemp;
 
-  SeatChooseBloc(String date,TimeSlotsVO timeSlotsVO) {
+  SeatChooseBloc(String date,TimeSlotsVO timeSlotsVO,[MovieBookingModel? movieBookingModel]) {
+    if(movieBookingModel!=null){
+      _movieBookingModel=movieBookingModel;
+    }
     setDateTemp =date;
     DateTime dateTime = DateTime.parse(getDateTemp);
     date =

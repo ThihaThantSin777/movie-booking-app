@@ -1,6 +1,8 @@
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_booking_app/bloc/pick_time_and_cinema_bloc.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/time_slots_vo.dart';
 import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
@@ -89,40 +91,9 @@ class PickTimeAndCinema extends StatelessWidget {
         );
   }
 
-  void _onDateChange(date) {
-    // String tempDate = '${date.year}-${date.month}-${date.day}';
-    // setState(() {
-    //   dateTime = date.toString();
-    //   this.date = date.toString().substring(0, 10);
-    //   movieBookingModel
-    //       .getDayTimeSlotsListFromDataBase(widget.movieVO.id ?? 0,
-    //           movieBookingModel.getToken() ?? '', tempDate)
-    //       .listen((value) {
-    //     setState(() {
-    //       daytimeSlotVOList = value?.daytimeSlotVOList ?? [];
-    //     });
-    //   }, onError: (error) => print(error));
-    //   daytimeSlotVOList?.forEach((element1) {
-    //     element1.timeSlots?.forEach((element2) {
-    //       element2.isSelect = false;
-    //     });
-    //   });
-    // });
-  }
 
-  void _selectTimeSlot(TimeSlotsVO timeSlotsVO) {
-    // setState(() {
-    //   daytimeSlotVOList?.forEach((element1) {
-    //     element1.timeSlots?.forEach((element2) {
-    //       if (element2 == timeSlotsVO) {
-    //         element2.isSelect = true;
-    //       } else {
-    //         element2.isSelect = false;
-    //       }
-    //     });
-    //   });
-    // });
-  }
+
+
 
   _showALertBox(context, String message, String subMessage) async {
     bool status = await showDialog(
@@ -130,6 +101,7 @@ class PickTimeAndCinema extends StatelessWidget {
         context: context,
         builder: (context) {
           return AlertDialog(
+            key: const Key('Alert DaytimeSlots Status Text'),
             title: Text(message),
             content: Text(subMessage),
             actions: [
@@ -150,7 +122,7 @@ class PickTimeAndCinema extends StatelessWidget {
       required TimeSlotsVO timeSlotsVO,
       required String dateTime,
       required DayTimeSlotVO dayTimeSlotVO}) {
-    if (status == null) {
+    if (status?.cinemaID == null) {
       _showALertBox(context, 'Error', 'Please choose one timeslots');
     } else {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
@@ -203,6 +175,7 @@ class PickTimeCinemaSessionView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: medium_large_2x),
               child: ButtonWidget(
+                backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
                   onClick: () => onClick(), child: ButtonTextView('Next')),
             ),
           )
@@ -241,7 +214,7 @@ class ChooseItemGridView extends StatelessWidget {
   final DayTimeSlotVO dayTimeSlotVO;
   final Function(TimeSlotsVO) onTap;
 
-  ChooseItemGridView({required this.dayTimeSlotVO, required this.onTap});
+  ChooseItemGridView({Key? key, required this.dayTimeSlotVO, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +244,7 @@ class CinemaSeatGridSessionView extends StatelessWidget {
   final List<TimeSlotsVO> timeSlotVO;
   final Function(TimeSlotsVO) onTap;
 
-  CinemaSeatGridSessionView({required this.timeSlotVO, required this.onTap});
+  CinemaSeatGridSessionView({Key? key, required this.timeSlotVO, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +257,9 @@ class CinemaSeatGridSessionView extends StatelessWidget {
         ),
         itemCount: timeSlotVO.length,
         itemBuilder: (context, index) {
+           print('${timeSlotVO[index].cinemaDayTimeSlotID}');
           return MovieSeatDetailsView(
+            key: Key('${timeSlotVO[index].cinemaDayTimeSlotID}'),
             timeSlotsVO: timeSlotVO[index],
             onTap: (obj) => onTap(obj),
           );
@@ -296,10 +271,11 @@ class MovieSeatDetailsView extends StatelessWidget {
   final TimeSlotsVO timeSlotsVO;
   final Function(TimeSlotsVO) onTap;
 
-  MovieSeatDetailsView({required this.timeSlotsVO, required this.onTap});
+  MovieSeatDetailsView({Key? key, required this.timeSlotsVO, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
         onTap: () {
           onTap(timeSlotsVO);

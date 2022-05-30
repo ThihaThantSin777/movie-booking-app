@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/time_slots_vo.dart';
 import 'package:movie_booking_app/data/vos/genre_vo/genre_vo.dart';
@@ -13,7 +15,8 @@ import 'package:movie_booking_app/data/vos/user_vo/card_vo.dart';
 import 'package:movie_booking_app/data/vos/user_vo/user_vo.dart';
 import 'package:movie_booking_app/page/home_screen.dart';
 import 'package:movie_booking_app/page/start_screen.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
+import 'package:movie_booking_app/persistance/abstraction_layer/user_dao.dart';
+import 'package:movie_booking_app/persistance/daos/user_dao_impl.dart';
 import 'package:movie_booking_app/persistance/hive_constant.dart';
 import 'package:movie_booking_app/resources/colors.dart';
 
@@ -48,15 +51,14 @@ main() async {
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
-  UserDAO userDAO = UserDAO();
+  UserDAO userDAO = UserDAOImpl();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        showPerformanceOverlay: true,
         title: 'Movie Bokking App',
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            backgroundColor: main_screen_color,
+            backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
             body:
                 userDAO.isUserVOEmpty() ? StartScreen() :  HomeScreen()));
   }

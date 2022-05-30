@@ -28,6 +28,7 @@ class TextFormFieldWidget extends StatelessWidget {
               const TextStyle(color: Colors.black38, fontSize: text_medium_2x),
         ),
         TextFormField(
+          key: key,
           controller: controller,
           validator: (str) => validation(str),
           obscureText: isObscureText,

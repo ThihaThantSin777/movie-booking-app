@@ -11,7 +11,7 @@ class HomeBloc extends ChangeNotifier {
    UserVO? _userVO;
    List<MovieVO>? _getNowPlayingmovieVO;
    List<MovieVO>? _getComingSoonMovieVO;
-  final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
+   MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
 
 
   get getUser=>_userVO;
@@ -22,7 +22,10 @@ class HomeBloc extends ChangeNotifier {
   set setNowPlayingVO(List<MovieVO>? nowPlayingVO)=>_getNowPlayingmovieVO=nowPlayingVO;
   set setComingSoonVO(List<MovieVO>? comingSoonVO)=>_getComingSoonMovieVO=comingSoonVO;
 
-  HomeBloc() {
+  HomeBloc([MovieBookingModel?movieBookingModel]) {
+    if(movieBookingModel!=null){
+      _movieBookingModel=movieBookingModel;
+    }
     ///get SnackList
     _movieBookingModel.getSnackList(_movieBookingModel.getToken() ?? '');
 
@@ -36,7 +39,6 @@ class HomeBloc extends ChangeNotifier {
 
     ///get Now Playing movies
     _movieBookingModel.getNowPlayingMovieModleFromDataBase(API_KEY, LANGUAGE, 1).listen((movies) {
-
       setNowPlayingVO = movies;
       notifyListeners();
     },
@@ -44,9 +46,8 @@ class HomeBloc extends ChangeNotifier {
     );
     ///get Coming soon movies
     _movieBookingModel.getComingSoonMovieModleFromDataBase(API_KEY, LANGUAGE, 1).listen((movies) {
-
         setComingSoonVO = movies;
-
+        notifyListeners();
     },
         onError: (error)=>print(error)
     );

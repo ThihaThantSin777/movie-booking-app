@@ -1,13 +1,16 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_booking_app/bloc/payment_bloc.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/check_out_vo/checkout_vo.dart';
 import 'package:movie_booking_app/data/vos/movie_vo/movie_vo.dart';
 import 'package:movie_booking_app/data/vos/user_vo/card_vo.dart';
+import 'package:movie_booking_app/data/vos/user_vo/select_card_vo.dart';
 import 'package:movie_booking_app/page/checkout_screen.dart';
-import 'package:movie_booking_app/persistance/daos/user_dao.dart';
+import 'package:movie_booking_app/persistance/daos/user_dao_impl.dart';
 import 'package:movie_booking_app/resources/colors.dart';
 import 'package:movie_booking_app/resources/dimension.dart';
 import 'package:movie_booking_app/resources/strings.dart';
@@ -111,6 +114,7 @@ class PaymentScreen extends StatelessWidget {
             selector: (_, bloc) => bloc.getCard,
             builder: (_, card, child) =>
                         ButtonWidget(
+                          backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
                             onClick: () {
                           paymentBloc.navigateToCheckOutScreen(
                               context,
@@ -232,23 +236,29 @@ class AddNewCardSessionView extends StatelessWidget {
 
 class VisaCardSessionView extends StatelessWidget {
   final CardVO cardVO;
-
-  VisaCardSessionView(this.cardVO);
+  final SelectCardVO selectCardVO;
+  VisaCardSessionView(this.cardVO,this.selectCardVO);
 
   @override
   Widget build(BuildContext context) {
+    bool? cond=IS_CARD_CAROUSAL_VIEW[EnvironmentConfig.CONFIG_CARD_CAROUSAL_VIEW];
     return Container(
       padding: const EdgeInsets.all(margin_small_2x),
+      margin: const EdgeInsets.only(right:margin_small_2x),
       width: 350,
       decoration: BoxDecoration(
+        border: cardVO==CardVO.normal()?Border.all(
+            color: (selectCardVO.isSelect??false)?Colors.amber:Colors.transparent,
+            width: 5,
+        ):null,
         borderRadius: BorderRadius.circular(border_radius_size),
-        color: visa_card_color,
+        color: (cond??false)?visa_card_color:const Color.fromRGBO(22,28,36,1.0),
       ),
       child: Stack(
         children: [
           Align(
             alignment: Alignment.topLeft,
-            child: VisaImageView(cardVO.cardType.toString()),
+            child: VisaImageView(cardVO==CardVO.normal()?selectCardVO.cardVO?.cardType.toString()??'':cardVO.cardType.toString()),
           ),
           const Align(alignment: Alignment.topRight, child: VisaMenuDotView()),
           Align(
@@ -264,7 +274,8 @@ class VisaCardSessionView extends StatelessWidget {
                   Expanded(
                     child: VisaStarView(),
                   ),
-                  VisaLastPasswordView(cardVO.cardNumber.toString()),
+
+                  VisaLastPasswordView(cardVO==CardVO.normal()?selectCardVO.cardVO?.cardNumber.toString()??'':cardVO.cardNumber.toString()),
                 ],
               )),
           Align(
@@ -272,11 +283,11 @@ class VisaCardSessionView extends StatelessWidget {
             child: Row(
               children: [
                 CardOwnerAndExpreSessionView(
-                    card_holder, cardVO.cardHolder.toString()),
+                    card_holder,  cardVO==CardVO.normal()?selectCardVO.cardVO?.cardHolder.toString()??'':cardVO.cardHolder.toString()),
                 const Spacer(),
                 CardOwnerAndExpreSessionView(
                   expire,
-                  cardVO.expirationDate.toString(),
+                    cardVO==CardVO.normal()?selectCardVO.cardVO?.expirationDate.toString()??'':cardVO.expirationDate.toString(),
                   isCrossAxisEnd: true,
                 ),
               ],
@@ -291,25 +302,52 @@ class VisaCardSessionView extends StatelessWidget {
 class CarouselSliderView extends StatelessWidget {
   final List<CardVO> cardVO;
   final Function(CardVO) saveCardVo;
-
   CarouselSliderView({required this.cardVO, required this.saveCardVo});
 
   @override
   Widget build(BuildContext context) {
-    return CarouselSlider.builder(
+  bool? cond=IS_CARD_CAROUSAL_VIEW[EnvironmentConfig.CONFIG_CARD_CAROUSAL_VIEW];
+    return (cond??false)?
+
+      CarouselSlider.builder(
         itemCount: cardVO.length,
         itemBuilder: (BuildContext context, int index, int pageViewIndex) {
-          return VisaCardSessionView(cardVO[index]);
+          return VisaCardSessionView(cardVO[index],SelectCardVO.normal());
         },
         options: CarouselOptions(
+
           onPageChanged: (pageIndex, reason) {
             saveCardVo(cardVO[pageIndex]);
           },
           height: carouselSliderHeight,
           enlargeCenterPage: true,
+          autoPlay: true,
           scrollDirection: Axis.horizontal,
           enableInfiniteScroll: false,
-        ));
+        )):SizedBox(
+      height: carouselSliderHeight,
+      child: Selector<PaymentBloc,List<SelectCardVO>?>(
+        shouldRebuild: (pre,next)=>pre!=next,
+        selector: (context,bloc)=>bloc.getSelectCardVO,
+        builder: (context,selectCardVoList,child){
+          return  (selectCardVoList?.isEmpty??false)?const Center(child: CircularProgressIndicator(),):
+          ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: margin_medium_1x),
+            scrollDirection: Axis.horizontal,
+            itemCount: selectCardVoList?.length,
+            itemBuilder: (context,index) {
+
+              return GestureDetector(
+                  onTap: (){
+                    saveCardVo(selectCardVoList![index].cardVO??CardVO.normal());
+                  },
+                  child: VisaCardSessionView(CardVO.normal(),selectCardVoList![index]));
+            },
+          );
+        }
+
+      ),
+    );
   }
 }
 

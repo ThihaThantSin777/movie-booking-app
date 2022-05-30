@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movie_booking_app/bloc/seat_choose_bloc.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/day_timeslot_vo/day_timeslot_vo.dart';
@@ -56,6 +58,7 @@ class SeatingTicketScreen extends StatelessWidget {
                 width: double.infinity,
                 color: Colors.white,
                 child: SingleChildScrollView(
+                    key: const Key('Scroll View'),
                     child: Selector<SeatChooseBloc,int>(
                       selector: (_,bloc)=>bloc.getSeatCount,
                       builder: (_,seatCount,child)=>
@@ -95,7 +98,7 @@ class SeatingTicketScreen extends StatelessWidget {
   }
 
   _showALertBox(context, String message, String subMessage) async {
-    bool status = await showDialog(
+   await showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
@@ -207,6 +210,7 @@ class MovieSeatGridSessionView extends StatelessWidget {
           height: margin_medium_3x,
         ),
         ButtonWidget(
+          backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
             onClick: () => onClick(),
             child: ButtonTextView('Buy Ticket for \$$price'))
       ],
@@ -332,7 +336,12 @@ class MovieSeatSessionView extends StatelessWidget {
           childAspectRatio: child_aspect_ratio,
         ),
         itemBuilder: (context, index) {
+          print(seatsList[index].seatName);
+          print(seatsList[index].symbol);
+          print(index);
+          print('');
           return MovieSeatView(
+            key: Key('Seat $index'),
             seatVO: seatsList[index],
             onTap: (obj) => onTap(obj),
           );
@@ -343,7 +352,7 @@ class MovieSeatSessionView extends StatelessWidget {
 class MovieSeatView extends StatelessWidget {
   final SeatinTypeVO seatVO;
   final Function(SeatinTypeVO) onTap;
-  MovieSeatView({required this.seatVO, required this.onTap});
+  MovieSeatView({Key? key, required this.seatVO, required this.onTap}) : super(key: key);
 
   String text() {
 
@@ -370,7 +379,7 @@ class MovieSeatView extends StatelessWidget {
         margin: const EdgeInsets.symmetric(
             horizontal: seat_view_margin, vertical: seat_view_margin),
         decoration: BoxDecoration(
-          color: seatVO.isSelect ? main_screen_color : _getSeatColor(seatVO),
+          color: seatVO.isSelect ? SEAT_COLOR[EnvironmentConfig.CONFIG_SEAT_COLOR] : _getSeatColor(seatVO),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(border_seat_view),
             topRight: Radius.circular(border_seat_view),

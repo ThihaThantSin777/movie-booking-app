@@ -7,7 +7,7 @@ import '../data/vos/day_timeslot_vo/day_timeslot_vo.dart';
 import '../data/vos/day_timeslot_vo/time_slots_vo.dart';
 
 class PickTimeAndCinemaBloc extends ChangeNotifier{
-  final MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
+   MovieBookingModel _movieBookingModel = MovieBookingModelImpl();
   List<DayTimeSlotVO>? _daytimeSlotVOList;
    String _date =
       '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
@@ -27,7 +27,10 @@ class PickTimeAndCinemaBloc extends ChangeNotifier{
   set setTimeSlotsVO(TimeSlotsVO? timeSlotsVO)=>_timeSlotsVO=timeSlotsVO;
   set setDaySlotsVO(DayTimeSlotVO? daySlotVO)=>_dayTimeSlotVO=daySlotVO;
 
-  PickTimeAndCinemaBloc(int movieID){
+  PickTimeAndCinemaBloc(int movieID,[MovieBookingModel? movieBookingModel]){
+    if(movieBookingModel!=null){
+      _movieBookingModel=movieBookingModel;
+    }
     _movieBookingModel.getDayTimeSlotsListFromDataBase(movieID, _movieBookingModel.getToken() ?? '', _date).listen((value) {
 
       setDayTimeSlotsVO = value?.daytimeSlotVOList??[];

@@ -87,9 +87,10 @@ CastCrewVO.normal();
 
   Map<String, dynamic> toJson() => _$CastCrewVOToJson(this);
 
+
   @override
   String toString() {
-    return 'CastCrewVO{adult: $adult, gender: $gender, id: $id, knownForDepartment: $knownForDepartment, name: $name, originalName: $originalName, popularity: $popularity, profilePath: $profilePath, castId: $castId, creditId: $creditId, character: $character, order: $order, department: $department, job: $job}';
+    return 'CastCrewVO{castList: $castList}';
   }
 
   @override

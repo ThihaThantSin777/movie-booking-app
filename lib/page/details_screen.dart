@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:movie_booking_app/bloc/details_bloc.dart';
+import 'package:movie_booking_app/config/config_values.dart';
+import 'package:movie_booking_app/config/environment_config.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model.dart';
 import 'package:movie_booking_app/data/modle/movie_booking_model_impl.dart';
 import 'package:movie_booking_app/data/vos/cast_crew_vo/cast_crew_vo.dart';
@@ -36,8 +38,8 @@ class MovieDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DetailsBloc(movieID),
+    return ChangeNotifierProvider.value(
+      value:  DetailsBloc(movieID),
       child: Selector<DetailsBloc, MovieVO?>(
           selector: (_, bloc) => bloc.getMovieVO,
           builder: (_, movieVO, child) => Scaffold(
@@ -79,7 +81,8 @@ class MovieDetailsScreen extends StatelessWidget {
                                         top: back_button_size,
                                         child: BackButtonView()),
                                   ],
-                                )),
+                                )
+                            ),
                           ),
                           Selector<DetailsBloc, List<CastCrewVO>?>(
                             selector: (_, bloc) => bloc.getCastCrewVO,
@@ -207,6 +210,7 @@ class ActorAndTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool ? cond=IS_ACTOR_ROW_VIEW[EnvironmentConfig.CONFIG_ACTOR_ROW_DESIGN];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -218,18 +222,28 @@ class ActorAndTitleView extends StatelessWidget {
               fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: margin_medium),
-        Container(
+        (cond??false)?
+        SizedBox(
           height: MediaQuery.of(context).size.height / 8,
           child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: castCrewVO.length,
               itemBuilder: (context, index) {
-                return ActorsView(
+                return
+                  ActorsView(
                     imageUrl: castCrewVO[index].profilePath == null
                         ? unKnownUrl
                         : '$BASE_IMAGE_URL${castCrewVO[index].profilePath}',
                     actorName: castCrewVO[index].originalName ?? "");
               }),
+        ):Wrap(
+          alignment: WrapAlignment.spaceEvenly,
+          crossAxisAlignment: WrapCrossAlignment.start,
+          children:castCrewVO.map((data) =>ActorsView(
+              imageUrl: data.profilePath == null
+                  ? unKnownUrl
+                  : '$BASE_IMAGE_URL${data.profilePath}',
+              actorName: data.originalName ?? "")).toList(),
         )
       ],
     );
@@ -537,6 +551,7 @@ class PinnedButtonView extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: margin_small_2x),
         child: ButtonWidget(
+          backgroundColor: THEME_COLORS[EnvironmentConfig.CONFIG_THEME_COLOR],
             onClick: () => onClick(), child: ButtonTextView(get_your_ticket)));
   }
 }
